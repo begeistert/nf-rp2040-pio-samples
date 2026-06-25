@@ -2,25 +2,25 @@
 <!--
   PRIVATE sample — nanoFramework app that drives a WS2812 via the RP2040/RP2350 PIO inline
   assembler. Self-contained: the nanoFramework build system (NFProjectSystem targets + corelib +
-  mdp) is vendored under ..\tools\nf, and the PIO library assembly under ..\tools\lib, so this
+  mdp) is vendored under ..\..\tools\nf, and the PIO library assembly under ..\..\tools\lib, so this
   showcase opens and builds in Rider/VS WITHOUT reaching into the nanoFramework.Hardware.Rp2040
   repo. Deploys to a Pico 1/2 flashed with an nf-interpreter firmware that includes that library.
 -->
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <NanoFrameworkProjectSystemPath>$(MSBuildThisFileDirectory)..\tools\nf\</NanoFrameworkProjectSystemPath>
+    <NanoFrameworkProjectSystemPath>$(MSBuildThisFileDirectory)..\..\tools\nf\</NanoFrameworkProjectSystemPath>
     <!-- The Metadata Processor task lives in the vendored mdp\ folder, not at the targets root. -->
-    <NF_MDP_MSBUILDTASK_PATH>$(MSBuildThisFileDirectory)..\tools\nf\mdp</NF_MDP_MSBUILDTASK_PATH>
+    <NF_MDP_MSBUILDTASK_PATH>$(MSBuildThisFileDirectory)..\..\tools\nf\mdp</NF_MDP_MSBUILDTASK_PATH>
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
-    <ProjectGuid>3f9b2d71-0c84-4e6a-9b2f-2a1d7c6e5f03</ProjectGuid>
+    <ProjectGuid>3f9b2d71-0c84-4e6a-9b2f-2a1d7c6e5f02</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>FadeSample</RootNamespace>
-    <AssemblyName>Fade.Sample</AssemblyName>
+    <RootNamespace>BlinkSample</RootNamespace>
+    <AssemblyName>Blink.Sample</AssemblyName>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" />
@@ -29,12 +29,12 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
-      <HintPath>$(MSBuildThisFileDirectory)..\tools\nf\corelib\mscorlib.dll</HintPath>
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\nf\corelib\mscorlib.dll</HintPath>
     </Reference>
     <!-- The PIO library, vendored as a built assembly (it is not on NuGet yet) so the sample stays
          independent of the nanoFramework.Hardware.Rp2040 repo. -->
     <Reference Include="nanoFramework.Hardware.Rp2040">
-      <HintPath>$(MSBuildThisFileDirectory)..\tools\lib\nanoFramework.Hardware.Rp2040.dll</HintPath>
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rp2040.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" />

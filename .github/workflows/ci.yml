@@ -1,0 +1,36 @@
+name: CI
+
+# Showcases the end-to-end validation: every PIO sample is booted on the RP2040 nanoCLR in the
+# RP2040Sharp emulator (via the RP2040Sharp.TestKit.NanoFramework NuGet test kit) and asserted —
+# no physical board needed. The PIO programs are assembled in C# at runtime.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: PIO integration tests (nanoCLR on emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Run integration tests
+        run: |
+          set -e
+          for sample in WS2812 Blink Fade; do
+            echo "::group::$sample.Integration.Tests"
+            dotnet test "tests/$sample.Integration.Tests" \
+              --configuration Release \
+              --logger "console;verbosity=normal"
+            echo "::endgroup::"
+          done

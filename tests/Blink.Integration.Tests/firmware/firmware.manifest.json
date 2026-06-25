@@ -1,0 +1,20 @@
+{
+  "target": "RP_PICO (RP2040)",
+  "description": "nanoCLR firmware with the nanoFramework.Hardware.Rp2040 PIO native interop.",
+  "nativeChecksums": {
+    "mscorlib": "0x1549C856",
+    "nanoFramework.Hardware.Rp2040": "0x4888E4A4"
+  },
+  "symbols": {
+    "g_CLR_RT_TypeSystem": "0x20001D60",
+    "g_CLR_RT_ExecutionEngine": "0x20001F80",
+    "Execute_IL": "0x1001DAE0",
+    "PioBlock.NativeAddProgram": "0x1002FA50",
+    "PioBlock.NativeClaimUnusedSm": "0x1002FB12",
+    "PioBlock.NativeInitGpio": "0x1002FB42",
+    "PioStateMachine.NativeInit": "0x1002FD04",
+    "PioStateMachine.NativePutBlocking": "0x1002FE52",
+    "PioStateMachine.NativeGetBlocking": "0x1002FE80",
+    "PioStateMachine.NativeSetConsecutivePinDirs": "0x1002FF16"
+  }
+}

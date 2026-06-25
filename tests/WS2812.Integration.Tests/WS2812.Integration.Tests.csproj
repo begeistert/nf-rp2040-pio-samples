@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Where the test kit's source generator emits the strongly-typed app symbols (AppSymbols). -->
+    <NanoSymbolsNamespace>WS2812.Integration.Tests</NanoSymbolsNamespace>
+    <NanoSymbolsClassName>AppSymbols</NanoSymbolsClassName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <!-- RP2040 emulator + nanoFramework test kit: boots the deployed app on the nanoCLR, walks managed
+         state, checks native checksums, and bundles the NanoSymbols source generator. The emulator
+         (RP2040Sharp) comes in transitively. Licensed BUSL-1.1 — the samples and the PIO library are MIT. -->
+    <PackageReference Include="RP2040Sharp.TestKit.NanoFramework" Version="1.0.1-beta.4" />
+  </ItemGroup>
+
+  <!-- One line wires it up: builds the sample app (Release) and emits AppSymbols from its metadata. -->
+  <ItemGroup>
+    <NanoFrameworkApp Include="..\..\src\WS2812.Sample\WS2812.Sample.nfproj" />
+  </ItemGroup>
+
+  <!-- The nanoCLR firmware (vendored) ships into the test output. -->
+  <ItemGroup>
+    <None Include="firmware\*.*" Link="firmware\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Stage the deployment .pe set (mscorlib + the PIO library + the app) into the test output. -->
+  <Target Name="StageNanoDeployment" AfterTargets="_NanoFrameworkBuildApps" BeforeTargets="Build">
+    <ItemGroup>
+      <_Pe Include="..\..\tools\nf\corelib\mscorlib.pe" />
+      <_Pe Include="..\..\src\WS2812.Sample\bin\Release\nanoFramework.Hardware.Rp2040.pe" />
+      <_Pe Include="..\..\src\WS2812.Sample\bin\Release\WS2812.Sample.pe" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
