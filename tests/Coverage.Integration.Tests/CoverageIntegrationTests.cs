@@ -97,6 +97,10 @@ public class CoverageIntegrationTests
 
         // Unclaim (Dispose) freed a state machine on an otherwise-full block (bookkeeping, not FIFO).
         Assert.Equal(1, Read(clr, AppSymbols.Fields.UnclaimWorks));
+
+        // FromEncoded(options): every metadata field round-tripped into the program (the whole harness
+        // above runs on a FromEncoded program; this also confirms the 3-arg overload still defaults them).
+        Assert.Equal(1, Read(clr, AppSymbols.Fields.FromEncodedOptionsOk));
     }
 
     [Fact]

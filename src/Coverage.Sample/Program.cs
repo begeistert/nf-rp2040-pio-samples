@@ -32,9 +32,11 @@ namespace CoverageSample
         public static int InitBadOffsetThrew;     // native: Init with an offset outside 0..31
         public static int PinDirsBadThrew;        // managed backstop: SetConsecutivePinDirs basePin > 47
         public static int InitGpioBadThrew;       // managed backstop: InitGpio pin > 47
+        public static int FromEncodedOptionsOk;   // 1 if FromEncoded(options) carried every metadata field
         public static int Done;                   // set last, so the test knows recording finished
 
-        // The smallest program that uses both FIFOs: TX -> OSR -> ISR -> RX.
+        // The smallest program that uses both FIFOs: TX -> OSR -> ISR -> RX. Round-tripped through the
+        // FromEncoded(options) overload so the whole harness runs end-to-end on a precompiled-style program.
         private static PioProgram BuildLoopback()
         {
             var asm = new PioAssembler();
@@ -43,7 +45,21 @@ namespace CoverageSample
             asm.Mov(PioDest.Isr, PioSrc.Osr);
             asm.Push(ifFull: false, block: true);
             asm.Wrap();
-            return asm.Build();
+            PioProgram built = asm.Build();
+            return PioProgram.FromEncoded(built.Instructions, built.WrapTarget, built.Wrap, new PioProgramOptions
+            {
+                Version = built.Version,
+                Origin = built.Origin,
+                SideSetCount = built.SideSetCount,
+                SideSetOpt = built.SideSetOpt,
+                SideSetPinDirs = built.SideSetPinDirs,
+                OutShiftDir = built.OutShiftDir,
+                AutoPull = built.AutoPull,
+                PullThreshold = built.PullThreshold,
+                InShiftDir = built.InShiftDir,
+                AutoPush = built.AutoPush,
+                PushThreshold = built.PushThreshold,
+            });
         }
 
         // Push a word and read its echo back, bounded so a stalled SM can't hang us. Both the TryPut and
@@ -225,6 +241,31 @@ namespace CoverageSample
             {
                 InitGpioBadThrew = 1;
             }
+
+            // FromEncoded(options) round-trip: every metadata field must survive into the program and the
+            // 3-arg overload must still default them. Not probe-observable, so checked against the properties.
+            ushort[] feInstr = new ushort[] { 0xA042 };
+            PioProgramOptions opts = new PioProgramOptions
+            {
+                Version = PioVersion.Rp2350,
+                Origin = 5,
+                SideSetCount = 2,
+                SideSetOpt = true,
+                SideSetPinDirs = true,
+                OutShiftDir = PioShiftDir.Left,
+                AutoPull = true,
+                PullThreshold = 8,
+                InShiftDir = PioShiftDir.Left,
+                AutoPush = true,
+                PushThreshold = 16,
+            };
+            PioProgram fe = PioProgram.FromEncoded(feInstr, 0, 0, opts);
+            PioProgram feDefault = PioProgram.FromEncoded(feInstr, 0, 0);
+            FromEncodedOptionsOk =
+                (fe.Version == PioVersion.Rp2350 && fe.Origin == 5 && fe.SideSetCount == 2 && fe.SideSetOpt &&
+                 fe.SideSetPinDirs && fe.OutShiftDir == PioShiftDir.Left && fe.AutoPull && fe.PullThreshold == 8 &&
+                 fe.InShiftDir == PioShiftDir.Left && fe.AutoPush && fe.PushThreshold == 16 &&
+                 !feDefault.AutoPull && feDefault.PullThreshold == 32 && feDefault.SideSetCount == 0) ? 1 : 0;
 
             Done = 1;
 
