@@ -1,6 +1,7 @@
 # RP2040 / RP2350 PIO — C# nanoFramework samples
 
 [![CI](https://github.com/begeistert/nf-rp2040-pio-samples/actions/workflows/ci.yml/badge.svg)](https://github.com/begeistert/nf-rp2040-pio-samples/actions/workflows/ci.yml)
+[![Profile](https://github.com/begeistert/nf-rp2040-pio-samples/actions/workflows/profile.yml/badge.svg)](https://github.com/begeistert/nf-rp2040-pio-samples/actions/workflows/profile.yml)
 
 Sample apps that drive real peripherals from C# on a Raspberry Pi Pico 1 (RP2040) / Pico 2 (RP2350),
 using the **PIO (Programmable I/O)** subsystem. Every PIO program is **assembled in C# at runtime** with
