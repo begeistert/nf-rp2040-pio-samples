@@ -1,6 +1,6 @@
 //
 // Private sample — fading the on-board LED of a Raspberry Pi Pico 1 (RP2040) / Pico 2 (RP2350)
-// from C# via the nanoFramework.Hardware.Rp2040 PIO inline assembler.
+// from C# via the nanoFramework.Hardware.Rpi PIO inline assembler.
 //
 // A PIO PWM program holds the side-set pin high for (duty+1)/32 of each period; the CPU just streams
 // the duty level into the TX FIFO. The state machine generates the PWM in hardware (no flicker), while
@@ -8,7 +8,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rp2040.Pio;
+using nanoFramework.Hardware.Rpi.Pio;
 
 namespace FadeSample
 {

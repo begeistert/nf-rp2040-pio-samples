@@ -8,7 +8,7 @@ using the **PIO (Programmable I/O)** subsystem. Every PIO program is **assembled
 an inline `PioAssembler` (no external `pioasm`, no raw `ushort[]`); a state machine runs it in hardware
 while the CPU only touches the FIFOs.
 
-These run on top of the `nanoFramework.Hardware.Rp2040` PIO library, which is being proposed for
+These run on top of the `nanoFramework.Hardware.Rpi` PIO library, which is being proposed for
 upstream — discussion: <https://github.com/orgs/nanoframework/discussions/1807>.
 
 ## Samples
@@ -36,7 +36,7 @@ tools/  vendored nanoFramework build system + PIO library assembly (so the apps 
 
 ## Running on your hardware
 
-The managed app needs an `nf-interpreter` firmware that **includes** the `nanoFramework.Hardware.Rp2040`
+The managed app needs an `nf-interpreter` firmware that **includes** the `nanoFramework.Hardware.Rpi`
 assembly and its PIO native interop. Once that firmware is flashed:
 
 1. Build/flash the firmware for your target (`RP_PICO_RP2040` for Pico 1, `RP_PICO2_RP2350` for Pico 2).

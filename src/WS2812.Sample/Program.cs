@@ -1,6 +1,6 @@
 //
 // Private sample — driving TWO independent WS2812 / NeoPixel strips at once on a Raspberry Pi
-// Pico 2 (RP2350) or Pico 1 (RP2040) using the nanoFramework.Hardware.Rp2040 PIO inline assembler.
+// Pico 2 (RP2350) or Pico 1 (RP2040) using the nanoFramework.Hardware.Rpi PIO inline assembler.
 //
 // One PIO block has four state machines, so a single assembled WS2812 program can drive several
 // strips concurrently — each on its own state machine and data pin, sharing the block's
@@ -9,7 +9,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rp2040.Pio;
+using nanoFramework.Hardware.Rpi.Pio;
 
 namespace Ws2812Sample
 {

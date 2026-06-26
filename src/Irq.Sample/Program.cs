@@ -12,7 +12,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rp2040.Pio;
+using nanoFramework.Hardware.Rpi.Pio;
 using nanoFramework.Runtime.Events;
 
 namespace IrqSample

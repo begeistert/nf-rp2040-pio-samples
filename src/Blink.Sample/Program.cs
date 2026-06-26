@@ -1,13 +1,13 @@
 //
 // Private sample — blinking the on-board LED of a Raspberry Pi Pico 1 (RP2040) / Pico 2 (RP2350)
-// from C# via the nanoFramework.Hardware.Rp2040 PIO inline assembler.
+// from C# via the nanoFramework.Hardware.Rpi PIO inline assembler.
 //
 // A tiny PIO program pulls a word and drives its low bit onto the OUT pin. The CPU just pushes 1/0
 // into the TX FIFO; the state machine drives the pin in hardware. The simplest "hello world" of PIO.
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rp2040.Pio;
+using nanoFramework.Hardware.Rpi.Pio;
 
 namespace BlinkSample
 {

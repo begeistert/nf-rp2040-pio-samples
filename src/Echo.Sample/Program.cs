@@ -1,6 +1,6 @@
 //
 // Sample — using a PIO state machine as a hardware FIFO loopback ("echo") on a Raspberry Pi
-// Pico 1 (RP2040) / Pico 2 (RP2350) from C# via the nanoFramework.Hardware.Rp2040 PIO assembler.
+// Pico 1 (RP2040) / Pico 2 (RP2350) from C# via the nanoFramework.Hardware.Rpi PIO assembler.
 //
 // No pins are involved: the program just shuttles each word the CPU pushes (TX FIFO -> OSR ->
 // ISR -> RX FIFO), so the app can push a value and read the same value back. It is the smallest
@@ -15,7 +15,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rp2040.Pio;
+using nanoFramework.Hardware.Rpi.Pio;
 
 namespace EchoSample
 {

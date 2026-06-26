@@ -29,7 +29,7 @@
   <Target Name="StageNanoDeployment" AfterTargets="_NanoFrameworkBuildApps" BeforeTargets="Build">
     <ItemGroup>
       <_Pe Include="..\..\tools\nf\corelib\mscorlib.pe" />
-      <_Pe Include="..\..\src\Blink.Sample\bin\Release\nanoFramework.Hardware.Rp2040.pe" />
+      <_Pe Include="..\..\src\Blink.Sample\bin\Release\nanoFramework.Hardware.Rpi.pe" />
       <_Pe Include="..\..\src\Blink.Sample\bin\Release\Blink.Sample.pe" />
     </ItemGroup>
     <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />

@@ -26,7 +26,7 @@ jobs:
       - name: Build each sample fresh and profile it
         run: |
           set -e
-          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware profiling/fixture; }
+          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware firmware; }
           mkdir -p reports
           {
             echo "# 🔬 nfprof — heap & time across the PIO samples"
@@ -38,7 +38,7 @@ jobs:
             # Build the sample app — the test kit's target stages its .pe set (mscorlib + lib + app).
             dotnet build "tests/$s.Integration.Tests" -c Release --nologo
             pe="tests/$s.Integration.Tests/bin/Release/net10.0/pe"
-            app=(--app-dir "$pe" --app-name "$s.Sample" --until NativeAddProgram)
+            app=(--app-dir "$pe" --app-name "$s.Sample" --until PioBlock.NativeAddProgram)
 
             {
               echo

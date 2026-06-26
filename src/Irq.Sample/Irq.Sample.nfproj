@@ -33,8 +33,8 @@
     <Reference Include="nanoFramework.Runtime.Events">
       <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Runtime.Events.dll</HintPath>
     </Reference>
-    <Reference Include="nanoFramework.Hardware.Rp2040">
-      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rp2040.dll</HintPath>
+    <Reference Include="nanoFramework.Hardware.Rpi">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rpi.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" />

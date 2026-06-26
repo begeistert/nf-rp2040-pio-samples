@@ -4,7 +4,7 @@
   RP2040/RP2350 PIO inline assembler. Self-contained: the nanoFramework build system
   (NFProjectSystem targets + corelib + mdp) is vendored under ..\..\tools\nf, and the PIO library
   assembly under ..\..\tools\lib, so this showcase opens and builds in Rider/VS WITHOUT reaching
-  into the nanoFramework.Hardware.Rp2040 repo. Deploys to a Pico 1/2 flashed with an nf-interpreter
+  into the nanoFramework.Hardware.Rpi repo. Deploys to a Pico 1/2 flashed with an nf-interpreter
   firmware that includes that library.
 -->
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -33,9 +33,9 @@
       <HintPath>$(MSBuildThisFileDirectory)..\..\tools\nf\corelib\mscorlib.dll</HintPath>
     </Reference>
     <!-- The PIO library, vendored as a built assembly (it is not on NuGet yet) so the sample stays
-         independent of the nanoFramework.Hardware.Rp2040 repo. -->
-    <Reference Include="nanoFramework.Hardware.Rp2040">
-      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rp2040.dll</HintPath>
+         independent of the nanoFramework.Hardware.Rpi repo. -->
+    <Reference Include="nanoFramework.Hardware.Rpi">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rpi.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" />

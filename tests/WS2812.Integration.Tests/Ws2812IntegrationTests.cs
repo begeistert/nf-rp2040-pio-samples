@@ -159,11 +159,11 @@ public class Ws2812IntegrationTests
         }
 
         File.WriteAllText(Path.Combine(tmp, "firmware.manifest.json"),
-            "{ \"nativeChecksums\": { \"nanoFramework.Hardware.Rp2040\": \"0xDEADBEEF\" } }");
+            "{ \"nativeChecksums\": { \"nanoFramework.Hardware.Rpi\": \"0xDEADBEEF\" } }");
 
         var ex = Assert.Throws<NanoChecksumMismatchException>(
             () => NanoFirmware.FromDirectory(tmp).AssertCompatible(app));
-        Assert.Equal("nanoFramework.Hardware.Rp2040", ex.Assembly);
+        Assert.Equal("nanoFramework.Hardware.Rpi", ex.Assembly);
         Assert.Equal(0xDEADBEEFu, ex.FirmwareChecksum);
     }
 }
