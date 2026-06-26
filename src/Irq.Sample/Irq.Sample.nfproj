@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sample — interrupt-driven PIO: a state machine raises a PIO IRQ and the CPU is notified through a
+  managed NativeEventDispatcher event (native "PioIrqDriver"). Self-contained: the nanoFramework
+  build system + corelib + the PIO library + nanoFramework.Runtime.Events are vendored under
+  ..\..\tools. Deploys to a Pico 1/2 flashed with an nf-interpreter firmware that includes the PIO
+  library and its PioIrqDriver.
+-->
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <NanoFrameworkProjectSystemPath>$(MSBuildThisFileDirectory)..\..\tools\nf\</NanoFrameworkProjectSystemPath>
+    <NF_MDP_MSBUILDTASK_PATH>$(MSBuildThisFileDirectory)..\..\tools\nf\mdp</NF_MDP_MSBUILDTASK_PATH>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <ProjectGuid>9b3d6e14-5a27-4c80-bf12-6e0a4d2c8f53</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>IrqSample</RootNamespace>
+    <AssemblyName>Irq.Sample</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" />
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\nf\corelib\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Runtime.Events">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Runtime.Events.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Hardware.Rp2040">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rp2040.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" />
+  <!-- Override the deploy-image step to a no-op: it needs nanoFramework.Tools.BuildTasks.dll, which
+       is not vendored. The compiler + Metadata Processor still produce the .pe/.pdbx. -->
+  <Target Name="NanoGenerateBinaryOutput" />
+</Project>
