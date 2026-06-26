@@ -11,7 +11,7 @@ namespace WS2812.Integration.Tests;
 
 /// <summary>
 /// Integration tests for the WS2812 showcase. They boot the RP2040 nanoCLR firmware on the
-/// RP2040Sharp emulator and run the deployed managed app, using RP2040.NanoFramework.TestKit:
+/// RP2040Sharp emulator and run the deployed managed app, using RP2040Sharp.NanoFramework.TestKit:
 /// firmware/deployment discovery, the native-checksum guard, and — the headline — driving the
 /// emulator to points <em>inside the running CLR</em> (a native InternalCall located by symbol).
 /// </summary>
