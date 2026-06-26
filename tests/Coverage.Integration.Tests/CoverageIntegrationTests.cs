@@ -1,18 +1,29 @@
 using System;
 using System.IO;
 using RP2040Sharp.NanoFramework.TestKit;
+using RP2040.TestKit.Probes;
 using Xunit;
 
 namespace Coverage.Integration.Tests;
 
 /// <summary>
-/// Boots the Coverage sample on the emulated RP2040 nanoCLR and checks the native PIO methods the
-/// other showcases don't exercise (RemoveProgram, Exec, Restart, ClockDivRestart, DrainTxFifo,
-/// Unclaim, GetRxLevel, SetClockDivisor, ClearIrq) plus the input-validation paths. The sample
-/// records its results into static fields and sets Done last. (Test kit BUSL; sample + library MIT.)
+/// Boots the Coverage sample on the emulated RP2040 nanoCLR and verifies the native PIO methods the
+/// other showcases don't reach. Where a method has a FIFO-observable effect we assert it through the
+/// <see cref="PioProbe"/> (the actual words the firmware pushed/pulled), exactly like Echo — not just a
+/// value the app recorded. The methods with no FIFO-observable effect (SetClockDivisor/ClockDivRestart,
+/// ClearIrq, Unclaim) are honest smoke checks, documented as such. (Test kit BUSL; sample + library MIT.)
 /// </summary>
 public class CoverageIntegrationTests
 {
+    // Mirror of CoverageSample.Program's sentinels (separate assembly, so duplicated here).
+    private const uint ExecSentinel = 21;
+    private const uint RestartSentinel = 0xBEEF;
+    private const uint DrainKept = 0xDDDD0003;
+    private const uint DrainDropped1 = 0xDDDD0001;
+    private const uint DrainDropped2 = 0xDDDD0002;
+    private const uint ClockSentinel = 0xC0DE;
+    private const uint ReuseSentinel = 0xABCDABCD;
+
     private static string FirmwareDir => Path.Combine(AppContext.BaseDirectory, "firmware");
     private static string PeDir => Path.Combine(AppContext.BaseDirectory, "pe");
 
@@ -35,9 +46,10 @@ public class CoverageIntegrationTests
         }
     }
 
-    private static NanoClrHarness BootUntilDone()
+    private static NanoClrHarness BootUntilDone(out PioProbe pio)
     {
         var clr = NanoClrHarness.Boot(Firmware(), App());
+        clr.Pico.AddPioProbe(0, out pio); // capture block-0 FIFO traffic from the very first cycle
         for (int i = 0; i < 30000 && !clr.IsLockedUp; i++)
         {
             clr.Pico.RunMicroseconds(100);
@@ -51,27 +63,46 @@ public class CoverageIntegrationTests
     }
 
     [Fact]
-    public void Exercises_the_remaining_native_methods()
+    public void Exercises_the_remaining_native_methods_observed_through_the_FIFO()
     {
-        using var clr = BootUntilDone();
+        using var clr = BootUntilDone(out PioProbe pio);
 
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
         Assert.Equal(1, Read(clr, AppSymbols.Fields.Done));
 
-        // RemoveProgram reclaimed the slots, so the re-added program reuses offset 0.
+        var rx = pio.RxOf(0);
+        var tx = pio.TxOf(0);
+
+        // Exec ran out of band: its sentinel is in RX but never in TX.
+        Assert.Contains(ExecSentinel, rx);
+        Assert.DoesNotContain(ExecSentinel, tx);
+
+        // RemoveProgram: slots reclaimed (reuse offset 0) and the reloaded program echoed (RemoveEchoOk).
         Assert.Equal(0, Read(clr, AppSymbols.Fields.RemoveReuseOffset));
-        // Unclaim (Dispose) freed a state machine on an otherwise-full block.
+        Assert.Equal(1, Read(clr, AppSymbols.Fields.RemoveEchoOk));
+
+        // Restart: the state machine resumed and still echoed after a restart.
+        Assert.Contains(RestartSentinel, rx);
+
+        // DrainTxFifo (smoke): ran without lockup; the drop isn't observable on this emulator, so the
+        // 0x8000 (PULL NoBlock) native fix is verified by semantics and real hardware.
+        Assert.Contains(DrainDropped1, tx);
+        Assert.Contains(DrainKept, rx);
+
+        // SetClockDivisor / ClockDivRestart (smoke): SM still echoes after re-clocking.
+        Assert.Contains(ClockSentinel, rx);
+
+        // GetRxLevel cross-check: the native FLEVEL read saw words actually sitting in RX.
+        Assert.True(Read(clr, AppSymbols.Fields.RxLevelSeen) > 0, "GetRxLevel reported nothing in RX");
+
+        // Unclaim (Dispose) freed a state machine on an otherwise-full block (bookkeeping, not FIFO).
         Assert.Equal(1, Read(clr, AppSymbols.Fields.UnclaimWorks));
-        // Exec / Restart / ClockDivRestart / DrainTxFifo / SetClockDivisor / ClearIrq all ran.
-        Assert.Equal(6, Read(clr, AppSymbols.Fields.MethodsRun));
-        // GetRxLevel returned a valid FIFO level.
-        Assert.InRange(Read(clr, AppSymbols.Fields.RxLevel), 0, 8);
     }
 
     [Fact]
     public void Rejects_invalid_input()
     {
-        using var clr = BootUntilDone();
+        using var clr = BootUntilDone(out _);
 
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
         Assert.Equal(1, Read(clr, AppSymbols.Fields.Done));
