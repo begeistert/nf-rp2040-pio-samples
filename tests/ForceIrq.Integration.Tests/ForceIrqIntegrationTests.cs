@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using RP2040Sharp.NanoFramework.TestKit;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace ForceIrq.Integration.Tests;
 
@@ -19,8 +18,6 @@ public class ForceIrqIntegrationTests
     private static NanoFirmware Firmware() => NanoFirmware.FromDirectory(FirmwareDir);
     private static NanoApp App() => NanoApp.FromPeDirectory(PeDir, appAssemblyName: "ForceIrq.Sample");
 
-    private readonly ITestOutputHelper _out;
-    public ForceIrqIntegrationTests(ITestOutputHelper output) => _out = output;
 
     [Fact]
     public void Delivers_CPU_forced_interrupts_to_a_managed_handler()
@@ -30,7 +27,6 @@ public class ForceIrqIntegrationTests
         bool reached = clr.RunUntilStatic(AppSymbols.Assembly, AppSymbols.Fields.IrqCount, v => v.AsInt32 >= 2);
         int irqCount = clr.ReadStaticInt32(AppSymbols.Assembly, AppSymbols.Fields.IrqCount);
 
-        _out.WriteLine($"IrqCount = {irqCount} after {clr.InstructionCount} instructions");
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
         Assert.True(reached, "the CPU-forced interrupt never reached the managed handler");
         Assert.True(irqCount >= 2);

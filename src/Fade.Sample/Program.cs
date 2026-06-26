@@ -17,9 +17,6 @@ namespace FadeSample
         // On-board LED on the Pico 1/2 (RP2040/RP2350, non-W). Change to match your wiring.
         private const int LedPin = 25;
 
-        // Duty steps streamed to the PWM SM. Exposed so the integration test can drive the CLR.
-        public static int Steps;
-
         public static void Main()
         {
             //   pull noblock side 0     ; new duty (or reuse last), pin low at period start
@@ -56,8 +53,8 @@ namespace FadeSample
             // Fade up and down forever (32 levels, ~30 ms per step => ~1 s each way).
             while (true)
             {
-                for (uint d = 0; d <= 31; d++) { sm.Put(d); Steps++; Thread.Sleep(30); }
-                for (int d = 31; d >= 0; d--) { sm.Put((uint)d); Steps++; Thread.Sleep(30); }
+                for (uint d = 0; d <= 31; d++) { sm.Put(d); Thread.Sleep(30); }
+                for (int d = 31; d >= 0; d--) { sm.Put((uint)d); Thread.Sleep(30); }
             }
         }
     }

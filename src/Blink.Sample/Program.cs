@@ -16,9 +16,6 @@ namespace BlinkSample
         // On-board LED on the Pico 1/2 (RP2040/RP2350, non-W). Change to match your wiring.
         private const int LedPin = 25;
 
-        // Toggles pushed to the LED. Exposed so the integration test can drive the CLR until it advances.
-        public static int Toggles;
-
         public static void Main()
         {
             // pull a word -> out its LSB to the pin -> loop. Shift RIGHT so OUT takes bit 0 of Put(1/0).
@@ -44,7 +41,6 @@ namespace BlinkSample
             {
                 on = !on;
                 sm.Put(on ? 1u : 0u);
-                Toggles++;
                 Thread.Sleep(500);
             }
         }

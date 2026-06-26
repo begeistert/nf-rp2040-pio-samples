@@ -19,19 +19,6 @@ namespace Ws2812Sample
         private const int Strip0Pin = 2;
         private const int Strip1Pin = 3;
 
-        // Total colours pushed across both strips. Exposed so the integration test can drive the
-        // CLR until this managed static reaches a value (a test-kit capability showcase).
-        public static int ColoursSent;
-
-        // Colours pushed per strip — a heap-allocated managed array the test reads as an instance object.
-        public static int[] PerStrip = new int[2];
-
-        // A 64-bit static (high word preset) so the test can exercise reading an int64 from the heap.
-        public static long Heartbeats = 0x1_0000_0000L;
-
-        // A heap-allocated object the test reads instance fields from, by name.
-        public static Stats Telemetry = new Stats();
-
         public static void Main()
         {
             PioProgram program = BuildWs2812();
@@ -60,14 +47,7 @@ namespace Ws2812Sample
             while (true)
             {
                 strip0.Put(a[i] << 8);
-                ColoursSent++;
-                PerStrip[0]++;
                 strip1.Put(b[i] << 8);
-                ColoursSent++;
-                PerStrip[1]++;
-                Heartbeats++;
-                Telemetry.Total += 2;
-                Telemetry.Iterations++;
                 i = (i + 1) % a.Length;
                 Thread.Sleep(500);
             }
@@ -106,12 +86,5 @@ namespace Ws2812Sample
             asm.OutShift(PioShiftDir.Left, autoPull: true, threshold: 24);
             return asm.Build();
         }
-    }
-
-    /// <summary>Run-time telemetry the integration test reads as instance fields by name.</summary>
-    public sealed class Stats
-    {
-        public int Total;
-        public int Iterations;
     }
 }

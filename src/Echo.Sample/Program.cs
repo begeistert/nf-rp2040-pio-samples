@@ -21,10 +21,6 @@ namespace EchoSample
 {
     public class Program
     {
-        // Words successfully pushed and echoed back unchanged. Exposed so the integration test can
-        // drive the CLR until the loopback has round-tripped a couple of words.
-        public static int Echoed;
-
         public static uint MaxTxLevel;
         public static uint LastPc;
 
@@ -66,15 +62,9 @@ namespace EchoSample
                     LastPc = sm.GetProgramCounter();
 
                     // Non-blocking pop, bounded so a stalled SM can never hang the app.
-                    uint echoed;
                     int guard = 0;
-                    while (!sm.TryGet(out echoed) && guard++ < 1000)
+                    while (!sm.TryGet(out _) && guard++ < 1000)
                     {
-                    }
-
-                    if (echoed == n)
-                    {
-                        Echoed++;
                     }
 
                     n++;
