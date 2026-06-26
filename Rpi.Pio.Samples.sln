@@ -31,9 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Irq.Integration.Tests", "te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WS2812.Integration.Tests", "tests\WS2812.Integration.Tests\WS2812.Integration.Tests.csproj", "{2A82054E-66F1-46BE-958D-09ADE38A2E8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dht.Sample", "src\Dht.Sample\Dht.Sample.nfproj", "{3F8A1C05-7D2E-4B96-A4F1-0E8C5B6D9A72}"
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "Dht.Sample", "src\Dht.Sample\Dht.Sample.nfproj", "{3F8A1C05-7D2E-4B96-A4F1-0E8C5B6D9A72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dht.Integration.Tests", "tests\Dht.Integration.Tests\Dht.Integration.Tests.csproj", "{D711BC0D-F7E6-4189-A1EA-777C97600296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dht.Integration.Tests", "tests\Dht.Integration.Tests\Dht.Integration.Tests.csproj", "{D711BC0D-F7E6-4189-A1EA-777C97600296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

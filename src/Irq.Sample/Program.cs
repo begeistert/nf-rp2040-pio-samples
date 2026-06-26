@@ -3,8 +3,8 @@
 // PIO IRQ in hardware and the CPU is notified through a managed event, instead of polling a FIFO.
 //
 // The PIO program just raises SM IRQ flag 0 on a loop (paced by the clock divider). The block's IRQ0
-// line is routed to the NVIC by the native "PioIrqDriver"; each raised flag is delivered to managed
-// code as a NativeEventDispatcher event, so the handler runs with zero CPU polling.
+// line is routed to the NVIC by the native driver; each raised flag is delivered to managed code
+// through the PioBlock.Interrupt event, so the handler runs with zero CPU polling.
 //
 //   .wrap_target
 //     irq 0  [15]      ; raise SM irq flag 0, then idle 15 cycles
@@ -13,7 +13,6 @@
 
 using System.Threading;
 using nanoFramework.Hardware.Rpi.Pio;
-using nanoFramework.Runtime.Events;
 
 namespace IrqSample
 {
@@ -39,11 +38,9 @@ namespace IrqSample
             sm.Init(offset, PioStateMachineConfig.FromProgram(program, (int)offset)
                 .ClockFromFrequency(50_000f));
 
-            // Subscribe to PIO block 0's interrupts. The native PioIrqDriver routes IRQ0 -> NVIC and
-            // posts a managed event carrying the raised flag bits.
-            var irq = new NativeEventDispatcher("PioIrqDriver", 0UL);
-            irq.OnInterrupt += (flags, _, time) => { IrqCount++; };
-            irq.EnableInterrupt();
+            // Subscribe to PIO block 0's interrupts. Subscribing arms the IRQ0 -> NVIC routing; the
+            // handler receives the raised SM flag mask (bit n => irq n).
+            pio.Interrupt += (sender, flags) => { IrqCount++; };
 
             sm.Enabled = true;
 
