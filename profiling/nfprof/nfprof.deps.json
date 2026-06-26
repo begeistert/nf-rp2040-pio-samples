@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v10.0": {
       "nfprof/1.0.0": {
         "dependencies": {
-          "NanoFramework.Clr.Profiling": "1.0.0",
+          "NfClr.Profiling": "1.0.0",
           "RP2040Sharp.NanoFramework.TestKit": "1.0.0",
           "RP2040.TestKit": "1.0.0.0"
         },
@@ -54,20 +54,20 @@
           }
         }
       },
-      "NanoFramework.Clr.Core/1.0.0": {
+      "NfClr.Core/1.0.0": {
         "runtime": {
-          "NanoFramework.Clr.Core.dll": {
+          "NfClr.Core.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
         }
       },
-      "NanoFramework.Clr.Profiling/1.0.0": {
+      "NfClr.Profiling/1.0.0": {
         "dependencies": {
-          "NanoFramework.Clr.Core": "1.0.0"
+          "NfClr.Core": "1.0.0"
         },
         "runtime": {
-          "NanoFramework.Clr.Profiling.dll": {
+          "NfClr.Profiling.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -83,7 +83,7 @@
       },
       "RP2040Sharp.NanoFramework.TestKit/1.0.0": {
         "dependencies": {
-          "NanoFramework.Clr.Core": "1.0.0",
+          "NfClr.Core": "1.0.0",
           "RP2040Sharp": "1.0.0",
           "RP2040Sharp.TestKit": "1.0.0"
         },
@@ -143,12 +143,12 @@
       "path": "system.security.cryptography.protecteddata/4.4.0",
       "hashPath": "system.security.cryptography.protecteddata.4.4.0.nupkg.sha512"
     },
-    "NanoFramework.Clr.Core/1.0.0": {
+    "NfClr.Core/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "NanoFramework.Clr.Profiling/1.0.0": {
+    "NfClr.Profiling/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
