@@ -1,0 +1,55 @@
+name: Profile
+
+# Puts nfprof to work as a CI/CD tool: on every push it profiles a deployed PIO app on the emulated
+# RP2040 nanoCLR (no board) and surfaces the reports — the heap and time breakdowns render right in the
+# job summary, and an interactive heap snapshot + flame graph are uploaded as artifacts.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  nfprof:
+    name: nfprof — memory & time report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Report heap + time into the job summary
+        run: |
+          set -e
+          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware profiling/fixture --deployment profiling/fixture/deployment.bin; }
+          {
+            echo "# 🔬 nfprof — nanoFramework profiling report"
+            echo "_Deployed PIO showcase, profiled on the RP2040 nanoCLR (cycle-accurate emulator, no board) — every push._"
+            echo
+            nf memory --until NativeAddProgram --top 15
+            echo
+            echo "## ⏱ Time profile (sampling)"
+            nf calls --until NativeAddProgram --instructions 6000000
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Export interactive heap snapshot + flame graph
+        run: |
+          set -e
+          mkdir -p reports
+          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware profiling/fixture --deployment profiling/fixture/deployment.bin; }
+          nf memory --until NativeAddProgram --format heapsnapshot --out reports/heap.heapsnapshot
+          nf calls  --until NativeAddProgram --instructions 6000000 --format speedscope --out reports/trace.speedscope.json
+          {
+            echo
+            echo "## 📂 Interactive reports"
+            echo "Download the **profiling-reports** artifact below, then:"
+            echo "- \`heap.heapsnapshot\` → Chrome DevTools › **Memory** › Load — retained sizes, dominator tree, retainers"
+            echo "- \`trace.speedscope.json\` → **https://speedscope.app** — flame graph"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: profiling-reports
+          path: reports/
