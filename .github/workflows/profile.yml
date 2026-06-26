@@ -1,8 +1,9 @@
 name: Profile
 
-# Puts nfprof to work as a CI/CD tool: on every push it profiles a deployed PIO app on the emulated
-# RP2040 nanoCLR (no board) and surfaces the reports — the heap and time breakdowns render right in the
-# job summary, and an interactive heap snapshot + flame graph are uploaded as artifacts.
+# nfprof as a CI/CD performance gate: on every push it builds each PIO sample fresh and profiles it on
+# the emulated RP2040 nanoCLR (no board). The memory + type breakdown render in the job summary, so a
+# change that grows the heap — or the run — shows up in these numbers (and a heap snapshot + flame graph
+# are uploaded per sample for the deep dive). The apps are built here, never hardcoded.
 
 on:
   push:
@@ -11,45 +12,50 @@ on:
 
 jobs:
   nfprof:
-    name: nfprof — memory & time report
+    name: nfprof — memory & time across the samples
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
-      - name: Report heap + time into the job summary
+      - name: Build each sample fresh and profile it
         run: |
           set -e
-          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware profiling/fixture --deployment profiling/fixture/deployment.bin; }
-          {
-            echo "# 🔬 nfprof — nanoFramework profiling report"
-            echo "_Deployed PIO showcase, profiled on the RP2040 nanoCLR (cycle-accurate emulator, no board) — every push._"
-            echo
-            nf memory --until NativeAddProgram --top 15
-            echo
-            echo "## ⏱ Time profile (sampling)"
-            nf calls --until NativeAddProgram --instructions 6000000
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Export interactive heap snapshot + flame graph
-        run: |
-          set -e
+          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware profiling/fixture; }
           mkdir -p reports
-          nf() { dotnet profiling/nfprof/nfprof.dll "$@" --firmware profiling/fixture --deployment profiling/fixture/deployment.bin; }
-          nf memory --until NativeAddProgram --format heapsnapshot --out reports/heap.heapsnapshot
-          nf calls  --until NativeAddProgram --instructions 6000000 --format speedscope --out reports/trace.speedscope.json
           {
-            echo
-            echo "## 📂 Interactive reports"
-            echo "Download the **profiling-reports** artifact below, then:"
-            echo "- \`heap.heapsnapshot\` → Chrome DevTools › **Memory** › Load — retained sizes, dominator tree, retainers"
-            echo "- \`trace.speedscope.json\` → **https://speedscope.app** — flame graph"
+            echo "# 🔬 nfprof — memory & time across the PIO samples"
+            echo "_Built fresh and profiled on every push — a change that grows the heap or lengthens the"
+            echo "run surfaces in these numbers, so performance regressions show up in review._"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+          for s in WS2812 Blink Fade; do
+            # Build the sample app — the test kit's target stages its .pe set (mscorlib + lib + app).
+            dotnet build "tests/$s.Integration.Tests" -c Release --nologo
+            pe="tests/$s.Integration.Tests/bin/Release/net10.0/pe"
+
+            {
+              echo
+              echo "## $s.Sample"
+              nf memory --app-dir "$pe" --app-name "$s.Sample" --until NativeAddProgram --top 10
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            nf memory --app-dir "$pe" --app-name "$s.Sample" --until NativeAddProgram \
+              --format heapsnapshot --out "reports/$s.heapsnapshot"
+            nf calls  --app-dir "$pe" --app-name "$s.Sample" --until NativeAddProgram \
+              --instructions 6000000 --format speedscope --out "reports/$s.speedscope.json"
+          done
+
+          {
+            echo
+            echo "## 📂 Interactive reports — download **profiling-reports**"
+            echo "Per sample: \`<sample>.heapsnapshot\` → Chrome DevTools › **Memory** › Load · \`<sample>.speedscope.json\` → **https://speedscope.app**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
         with:
           name: profiling-reports
           path: reports/
