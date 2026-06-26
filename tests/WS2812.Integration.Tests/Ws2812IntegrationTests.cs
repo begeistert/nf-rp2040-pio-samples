@@ -85,11 +85,11 @@ public class Ws2812IntegrationTests
         }
 
         File.WriteAllText(Path.Combine(tmp, "firmware.manifest.json"),
-            "{ \"nativeChecksums\": { \"nanoFramework.Hardware.Rpi\": \"0xDEADBEEF\" } }");
+            "{ \"nativeChecksums\": { \"nanoFramework.Hardware.Pico\": \"0xDEADBEEF\" } }");
 
         var ex = Assert.Throws<NanoChecksumMismatchException>(
             () => NanoFirmware.FromDirectory(tmp).AssertCompatible(app));
-        Assert.Equal("nanoFramework.Hardware.Rpi", ex.Assembly);
+        Assert.Equal("nanoFramework.Hardware.Pico", ex.Assembly);
         Assert.Equal(0xDEADBEEFu, ex.FirmwareChecksum);
     }
 

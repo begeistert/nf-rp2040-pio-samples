@@ -12,7 +12,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rpi.Pio;
+using nanoFramework.Hardware.Pico.Pio;
 
 namespace IrqSample
 {

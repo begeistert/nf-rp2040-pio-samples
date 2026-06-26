@@ -1,6 +1,6 @@
 //
 // Sample — reading a DHT22 (AM2302) temperature/humidity sensor with a PIO state machine on a
-// Raspberry Pi Pico 1 (RP2040) / Pico 2 (RP2350) from C# via the nanoFramework.Hardware.Rpi
+// Raspberry Pi Pico 1 (RP2040) / Pico 2 (RP2350) from C# via the nanoFramework.Hardware.Pico
 // PIO inline assembler.
 //
 // The DHT one-wire protocol is pure timing: after an ~1 ms start pulse the sensor answers with 40
@@ -14,7 +14,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rpi.Pio;
+using nanoFramework.Hardware.Pico.Pio;
 
 namespace DhtSample
 {

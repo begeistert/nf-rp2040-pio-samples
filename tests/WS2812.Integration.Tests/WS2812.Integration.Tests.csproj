@@ -35,7 +35,7 @@
     <ItemGroup>
       <_Pe Include="..\..\tools\nf\corelib\mscorlib.pe" />
       <_Pe Include="..\..\tools\lib\nanoFramework.Runtime.Events.pe" />
-      <_Pe Include="..\..\src\WS2812.Sample\bin\Release\nanoFramework.Hardware.Rpi.pe" />
+      <_Pe Include="..\..\src\WS2812.Sample\bin\Release\nanoFramework.Hardware.Pico.pe" />
       <_Pe Include="..\..\src\WS2812.Sample\bin\Release\WS2812.Sample.pe" />
     </ItemGroup>
     <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />

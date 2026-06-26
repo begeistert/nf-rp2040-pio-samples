@@ -4,7 +4,7 @@
 //
 
 using System.Threading;
-using nanoFramework.Hardware.Rpi.Pio;
+using nanoFramework.Hardware.Pico.Pio;
 using nanoFramework.Runtime.Events;
 
 namespace ForceIrqSample
