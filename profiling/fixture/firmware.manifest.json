@@ -1,9 +1,0 @@
-{
-  "symbols": {
-    "g_CLR_RT_TypeSystem": "0x20001d60",
-    "g_CLR_RT_ExecutionEngine": "0x20001f80",
-    "g_CLR_RT_GarbageCollector": "0x20001b1c",
-    "Execute_IL": "0x1001dae0",
-    "NativeAddProgram": "0x1002fba8"
-  }
-}

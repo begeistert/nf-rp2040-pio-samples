@@ -15,7 +15,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <!-- RP2040 emulator + nanoFramework test kit (boot the nanoCLR, walk managed state, check
          checksums) + the NanoSymbols generator. BUSL-1.1 — the samples and the PIO library are MIT. -->
-    <PackageReference Include="RP2040Sharp.TestKit.NanoFramework" Version="1.0.1-beta.4" />
+    <PackageReference Include="RP2040Sharp.NanoFramework.TestKit" Version="1.0.1-beta.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="firmware\*.*" Link="firmware\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\firmware\*.*" Link="firmware\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="StageNanoDeployment" AfterTargets="_NanoFrameworkBuildApps" BeforeTargets="Build">

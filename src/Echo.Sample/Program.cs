@@ -25,6 +25,9 @@ namespace EchoSample
         // drive the CLR until the loopback has round-tripped a couple of words.
         public static int Echoed;
 
+        public static uint MaxTxLevel;
+        public static uint LastPc;
+
         public static void Main()
         {
             var asm = new PioAssembler();
@@ -54,6 +57,14 @@ namespace EchoSample
                 // instead of stalling the CLR thread.
                 if (sm.TryPut(n))
                 {
+                    uint level = sm.GetTxLevel();
+                    if (level > MaxTxLevel)
+                    {
+                        MaxTxLevel = level;
+                    }
+
+                    LastPc = sm.GetProgramCounter();
+
                     // Non-blocking pop, bounded so a stalled SM can never hang the app.
                     uint echoed;
                     int guard = 0;

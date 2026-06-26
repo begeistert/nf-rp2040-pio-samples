@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using RP2040.NanoFramework.TestKit;
+using RP2040Sharp.NanoFramework.TestKit;
+using RP2040.TestKit.Probes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -39,11 +41,50 @@ public class EchoIntegrationTests
     }
 
     [Fact]
+    public void Reads_back_FIFO_level_and_program_counter()
+    {
+        using var clr = NanoClrHarness.Boot(Firmware(), App());
+        clr.RunUntilStatic(AppSymbols.Assembly, AppSymbols.Fields.Echoed, v => v.AsInt32 >= 2);
+
+        int pc = clr.ReadStaticInt32(AppSymbols.Assembly, AppSymbols.Fields.LastPc);
+        int maxTx = clr.ReadStaticInt32(AppSymbols.Assembly, AppSymbols.Fields.MaxTxLevel);
+
+        _out.WriteLine($"LastPc = {pc}, MaxTxLevel = {maxTx}");
+        // PC stays within the 3-instruction loopback program; FIFO level is a valid 0..8 read-back.
+        Assert.InRange(pc, 0, 2);
+        Assert.InRange(maxTx, 0, 8);
+    }
+
+    [Fact]
+    public void Echoes_each_word_back_unchanged_through_both_FIFOs()
+    {
+        using var clr = NanoClrHarness.Boot(Firmware(), App());
+        clr.Pico.AddPioProbe(0, out PioProbe pio);
+
+        for (int i = 0; i < 8000 && pio.RxOf(0).Count < 3; i++)
+            clr.Pico.RunMicroseconds(100);
+
+        Assert.False(clr.IsLockedUp, "nanoCLR locked up");
+        Assert.True(pio.RxOf(0).Count >= 3, "no words came back from the loopback");
+
+        // The app pushes 1,2,3…; the loopback returns each unchanged, so TX and RX carry the same words.
+        Assert.Equal(new uint[] { 1, 2, 3 }, First(pio.TxOf(0), 3));
+        Assert.Equal(new uint[] { 1, 2, 3 }, First(pio.RxOf(0), 3));
+    }
+
+    [Fact]
     public void Deployment_is_compatible_with_the_firmware()
     {
         // The native checksum changes whenever the PIO library's InternalCall surface changes, so we
         // assert compatibility against the bundled firmware rather than hard-coding a literal value.
         NanoApp app = App();
         Firmware().AssertCompatible(app); // must not throw
+    }
+
+    private static uint[] First(IReadOnlyList<uint> w, int n)
+    {
+        var r = new uint[n];
+        for (int i = 0; i < n; i++) r[i] = w[i];
+        return r;
     }
 }

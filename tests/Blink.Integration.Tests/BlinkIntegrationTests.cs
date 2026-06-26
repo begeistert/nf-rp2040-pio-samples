@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using RP2040.NanoFramework.TestKit;
+using RP2040Sharp.NanoFramework.TestKit;
+using RP2040.TestKit.Probes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,6 +16,8 @@ namespace Blink.Integration.Tests;
 /// </summary>
 public class BlinkIntegrationTests
 {
+    private const int LedPin = 25;
+
     private static string FirmwareDir => Path.Combine(AppContext.BaseDirectory, "firmware");
     private static string PeDir => Path.Combine(AppContext.BaseDirectory, "pe");
 
@@ -38,10 +42,34 @@ public class BlinkIntegrationTests
     }
 
     [Fact]
+    public void Drives_the_LED_pin_with_alternating_levels()
+    {
+        using var clr = NanoClrHarness.Boot(Firmware(), App());
+        clr.Pico.AddPioProbe(0, out PioProbe pio);
+
+        // Toggles are 500 ms apart (Thread.Sleep), so step in coarse chunks until four have landed.
+        for (int i = 0; i < 8000 && pio.TxOf(0).Count < 4; i++)
+            clr.Pico.RunMicroseconds(500);
+
+        Assert.False(clr.IsLockedUp, "nanoCLR locked up");
+        Assert.True(pio.TxOf(0).Count >= 4, "no toggles reached the PIO FIFO");
+
+        // The app pushes 1,0,1,0 — exactly the levels that crossed into the SM's TX FIFO.
+        Assert.Equal(new uint[] { 1, 0, 1, 0 }, First(pio.TxOf(0), 4));
+        Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(LedPin));
+    }
+
+    [Fact]
     public void Deployment_native_checksums_match_the_firmware()
     {
         NanoApp app = App();
-        Assert.Equal(0x4888E4A4u, app.NativeChecksums["nanoFramework.Hardware.Rp2040"]);
         Firmware().AssertCompatible(app); // must not throw
+    }
+
+    private static uint[] First(IReadOnlyList<uint> w, int n)
+    {
+        var r = new uint[n];
+        for (int i = 0; i < n; i++) r[i] = w[i];
+        return r;
     }
 }

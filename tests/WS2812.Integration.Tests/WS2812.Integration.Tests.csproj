@@ -17,7 +17,7 @@
     <!-- RP2040 emulator + nanoFramework test kit: boots the deployed app on the nanoCLR, walks managed
          state, checks native checksums, and bundles the NanoSymbols source generator. The emulator
          (RP2040Sharp) comes in transitively. Licensed BUSL-1.1 — the samples and the PIO library are MIT. -->
-    <PackageReference Include="RP2040Sharp.TestKit.NanoFramework" Version="1.0.1-beta.4" />
+    <PackageReference Include="RP2040Sharp.NanoFramework.TestKit" Version="1.0.1-beta.6" />
   </ItemGroup>
 
   <!-- One line wires it up: builds the sample app (Release) and emits AppSymbols from its metadata. -->
@@ -27,7 +27,7 @@
 
   <!-- The nanoCLR firmware (vendored) ships into the test output. -->
   <ItemGroup>
-    <None Include="firmware\*.*" Link="firmware\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\firmware\*.*" Link="firmware\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- Stage the deployment .pe set (mscorlib + the PIO library + the app) into the test output. -->

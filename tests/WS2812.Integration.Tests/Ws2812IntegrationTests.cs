@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using RP2040.NanoFramework.TestKit;
+using RP2040Sharp.NanoFramework.TestKit;
 using RP2040.TestKit.Boards;
 using RP2040.TestKit.Probes;
 using Xunit;
@@ -34,22 +35,28 @@ public class Ws2812IntegrationTests
         using var clr = NanoClrHarness.Boot(Firmware(), App());
         clr.Pico.AddPioProbe(0, out PioProbe pio);
 
-        // Observable peripheral state advances monotonically, so batched stepping is fine (and fast).
-        for (int i = 0; i < 16000 &&
-             (pio.TxOf(0).Count < 1
-              || pio.TxOf(1).Count < 1
-              || clr.Pico.Rp2040.IoBank0.GetFuncSel(Strip0Pin) != 6
-              || clr.Pico.Rp2040.IoBank0.GetFuncSel(Strip1Pin) != 6); i++)
+        // Run until both strips have their three colours latched into the TX FIFO (or give up).
+        for (int i = 0; i < 16000 && (pio.TxOf(0).Count < 3 || pio.TxOf(1).Count < 3); i++)
         {
             clr.Pico.RunMicroseconds(50);
         }
 
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
-        Assert.True(pio.TxOf(0).Count >= 1, "strip 0 (SM0) received no colours");
-        Assert.True(pio.TxOf(1).Count >= 1, "strip 1 (SM1) received no colours");
+        Assert.True(pio.TxOf(0).Count >= 3 && pio.TxOf(1).Count >= 3, "strips never received their colours");
+
+        // The exact GRB words the app pushed crossed into each SM's TX FIFO, in order — proof the
+        // managed -> PIO path carries the real payload, not just "some" traffic.
+        Assert.Equal(new[] { Grb(64, 0, 0), Grb(0, 64, 0), Grb(0, 0, 64) }, First3(pio.TxOf(0)));
+        Assert.Equal(new[] { Grb(0, 0, 64), Grb(64, 0, 0), Grb(0, 64, 0) }, First3(pio.TxOf(1)));
+
+        // Both data pins are handed to the PIO (funcsel 6).
         Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(Strip0Pin));
         Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(Strip1Pin));
     }
+
+    // Mirrors the app: GRB packed, then shifted left 8 because the SM clocks out the top 24 bits.
+    private static uint Grb(byte r, byte g, byte b) => (uint)(((g << 16) | (r << 8) | b) << 8);
+    private static uint[] First3(IReadOnlyList<uint> w) => new[] { w[0], w[1], w[2] };
 
     [Fact]
     public void Runs_the_CLR_until_the_app_crosses_into_native_AddProgram()
@@ -135,7 +142,6 @@ public class Ws2812IntegrationTests
     public void Deployment_native_checksums_match_the_firmware()
     {
         NanoApp app = App();
-        Assert.Equal(0x4888E4A4u, app.NativeChecksums["nanoFramework.Hardware.Rp2040"]);
         Firmware().AssertCompatible(app); // must not throw
     }
 

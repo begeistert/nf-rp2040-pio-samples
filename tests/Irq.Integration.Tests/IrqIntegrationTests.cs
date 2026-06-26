@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using RP2040.NanoFramework.TestKit;
+using RP2040Sharp.NanoFramework.TestKit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -37,6 +37,24 @@ public class IrqIntegrationTests
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
         Assert.True(reached, "the PIO interrupt never reached the managed handler");
         Assert.True(irqCount >= 2);
+    }
+
+    [Fact]
+    public void Keeps_delivering_interrupts_without_stalling()
+    {
+        using var clr = NanoClrHarness.Boot(Firmware(), App());
+
+        clr.RunUntilStatic(AppSymbols.Assembly, AppSymbols.Fields.IrqCount, v => v.AsInt32 >= 2);
+        int first = clr.ReadStaticInt32(AppSymbols.Assembly, AppSymbols.Fields.IrqCount);
+
+        // The IRQ -> NVIC -> event path must keep firing: the ISR critical section holds up under
+        // repeated delivery instead of corrupting the HAL event queue and stalling.
+        bool grew = clr.RunUntilStatic(AppSymbols.Assembly, AppSymbols.Fields.IrqCount, v => v.AsInt32 >= first + 5);
+        int later = clr.ReadStaticInt32(AppSymbols.Assembly, AppSymbols.Fields.IrqCount);
+
+        _out.WriteLine($"IrqCount {first} -> {later}");
+        Assert.False(clr.IsLockedUp, "nanoCLR locked up");
+        Assert.True(grew && later >= first + 5, $"interrupts stopped flowing: {first} -> {later}");
     }
 
     [Fact]

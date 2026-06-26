@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using RP2040.NanoFramework.TestKit;
+using RP2040Sharp.NanoFramework.TestKit;
+using RP2040.TestKit.Probes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,6 +16,8 @@ namespace Fade.Integration.Tests;
 /// </summary>
 public class FadeIntegrationTests
 {
+    private const int LedPin = 25;
+
     private static string FirmwareDir => Path.Combine(AppContext.BaseDirectory, "firmware");
     private static string PeDir => Path.Combine(AppContext.BaseDirectory, "pe");
 
@@ -38,10 +42,33 @@ public class FadeIntegrationTests
     }
 
     [Fact]
+    public void Streams_the_duty_ramp_into_the_TX_FIFO()
+    {
+        using var clr = NanoClrHarness.Boot(Firmware(), App());
+        clr.Pico.AddPioProbe(0, out PioProbe pio);
+
+        for (int i = 0; i < 8000 && pio.TxOf(0).Count < 5; i++)
+            clr.Pico.RunMicroseconds(100);
+
+        Assert.False(clr.IsLockedUp, "nanoCLR locked up");
+        Assert.True(pio.TxOf(0).Count >= 5, "no duty steps reached the PIO FIFO");
+
+        // The app ramps the duty 0,1,2,3,4… straight into the SM's TX FIFO.
+        Assert.Equal(new uint[] { 0, 1, 2, 3, 4 }, First(pio.TxOf(0), 5));
+        Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(LedPin));
+    }
+
+    [Fact]
     public void Deployment_native_checksums_match_the_firmware()
     {
         NanoApp app = App();
-        Assert.Equal(0x4888E4A4u, app.NativeChecksums["nanoFramework.Hardware.Rp2040"]);
         Firmware().AssertCompatible(app); // must not throw
+    }
+
+    private static uint[] First(IReadOnlyList<uint> w, int n)
+    {
+        var r = new uint[n];
+        for (int i = 0; i < n; i++) r[i] = w[i];
+        return r;
     }
 }
