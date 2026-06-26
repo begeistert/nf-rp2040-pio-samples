@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sample — nanoFramework app that reads a DHT22 sensor with a PIO state machine via the RP2040/RP2350
+  PIO inline assembler. Self-contained: the nanoFramework build system (NFProjectSystem targets +
+  corelib + mdp) is vendored under ..\..\tools\nf, and the PIO library assembly under ..\..\tools\lib,
+  so this showcase opens and builds in Rider/VS WITHOUT reaching into the nanoFramework.Hardware.Rpi
+  repo. Deploys to a Pico 1/2 flashed with an nf-interpreter firmware that includes that library.
+-->
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <NanoFrameworkProjectSystemPath>$(MSBuildThisFileDirectory)..\..\tools\nf\</NanoFrameworkProjectSystemPath>
+    <!-- The Metadata Processor task lives in the vendored mdp\ folder, not at the targets root. -->
+    <NF_MDP_MSBUILDTASK_PATH>$(MSBuildThisFileDirectory)..\..\tools\nf\mdp</NF_MDP_MSBUILDTASK_PATH>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <ProjectGuid>3f8a1c05-7d2e-4b96-a4f1-0e8c5b6d9a72</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DhtSample</RootNamespace>
+    <AssemblyName>Dht.Sample</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" />
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\nf\corelib\mscorlib.dll</HintPath>
+    </Reference>
+    <!-- The PIO library, vendored as a built assembly (it is not on NuGet yet) so the sample stays
+         independent of the nanoFramework.Hardware.Rpi repo. -->
+    <Reference Include="nanoFramework.Hardware.Rpi">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Rpi.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" />
+  <!-- Override the deploy-image step to a no-op: it needs nanoFramework.Tools.BuildTasks.dll, which
+       is not vendored. The compiler + Metadata Processor still produce the .pe/.pdbx. -->
+  <Target Name="NanoGenerateBinaryOutput" />
+</Project>
