@@ -34,7 +34,7 @@ jobs:
             echo "in these numbers, so memory regressions show up in review._"
           } >> "$GITHUB_STEP_SUMMARY"
 
-          for s in WS2812 Blink Fade; do
+          for s in WS2812 Blink Fade Echo Irq ForceIrq Dht; do
             # Build the sample app — the test kit's target stages its .pe set (mscorlib + lib + app).
             dotnet build "tests/$s.Integration.Tests" -c Release --nologo
             pe="tests/$s.Integration.Tests/bin/Release/net10.0/pe"
