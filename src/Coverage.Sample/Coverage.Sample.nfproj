@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sample — coverage harness: exercises the PIO native methods the other showcases don't touch
+  (RemoveProgram, Exec, Restart, ClockDivRestart, DrainTxFifo, Unclaim, GetRxLevel, SetClockDivisor,
+  ClearIrq) and the input-validation paths, recording results into static fields the integration
+  test reads. Self-contained like the other samples (vendored tools under ..\..\tools).
+-->
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <NanoFrameworkProjectSystemPath>$(MSBuildThisFileDirectory)..\..\tools\nf\</NanoFrameworkProjectSystemPath>
+    <NF_MDP_MSBUILDTASK_PATH>$(MSBuildThisFileDirectory)..\..\tools\nf\mdp</NF_MDP_MSBUILDTASK_PATH>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <ProjectGuid>8d2f0b63-4c7e-4a91-b2d3-0f5e7c9a1b42</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CoverageSample</RootNamespace>
+    <AssemblyName>Coverage.Sample</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" />
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\nf\corelib\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Hardware.Pico">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Hardware.Pico.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" />
+  <Target Name="NanoGenerateBinaryOutput" />
+</Project>

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NanoSymbolsNamespace>Coverage.Integration.Tests</NanoSymbolsNamespace>
+    <NanoSymbolsClassName>AppSymbols</NanoSymbolsClassName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="RP2040Sharp.NanoFramework.TestKit" Version="1.0.1-beta.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <NanoFrameworkApp Include="..\..\src\Coverage.Sample\Coverage.Sample.nfproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\firmware\*.*" Link="firmware\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="StageNanoDeployment" AfterTargets="_NanoFrameworkBuildApps" BeforeTargets="Build">
+    <ItemGroup>
+      <_Pe Include="..\..\tools\nf\corelib\mscorlib.pe" />
+      <_Pe Include="..\..\tools\lib\nanoFramework.Runtime.Events.pe" />
+      <_Pe Include="..\..\src\Coverage.Sample\bin\Release\nanoFramework.Hardware.Pico.pe" />
+      <_Pe Include="..\..\src\Coverage.Sample\bin\Release\Coverage.Sample.pe" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
