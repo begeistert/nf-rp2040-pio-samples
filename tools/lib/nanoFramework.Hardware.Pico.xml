@@ -202,6 +202,7 @@
             <param name="program">The program previously returned by <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.AddProgram(nanoFramework.Hardware.Pico.Pio.PioProgram)"/>.</param>
             <param name="offset">The load offset the program occupies.</param>
             <exception cref="T:System.ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="offset"/> plus the program length exceeds the 32-word instruction memory.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine">
             <summary>Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).</summary>
@@ -405,6 +406,7 @@
             <param name="sideUsed">Whether this instruction asserts a side-set value.</param>
             <param name="sideSetCount">Side-set value-bit count (excludes the opt enable bit).</param>
             <param name="sideSetOpt">Whether side-set is optional for this program.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="sideSetCount"/> (plus the optional enable bit) exceeds the 5-bit delay/side field.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="delay"/> or <paramref name="sideValue"/> does not fit its field.</exception>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioFifoJoin">
@@ -580,6 +582,7 @@
             <returns>A program wrapping the supplied instructions and metadata.</returns>
             <exception cref="T:System.ArgumentNullException"><paramref name="instructions"/> or <paramref name="options"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentException"><paramref name="instructions"/> is empty or longer than 32 instructions.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="wrapTarget"/>/<paramref name="wrap"/> are outside the program, or an <paramref name="options"/> field is out of range.</exception>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioProgramOptions">
             <summary>Program-level configuration for <see cref="M:nanoFramework.Hardware.Pico.Pio.PioProgram.FromEncoded(System.UInt16[],System.Int32,System.Int32,nanoFramework.Hardware.Pico.Pio.PioProgramOptions)"/>, mirroring what <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Build"/> captures.</summary>
@@ -657,8 +660,11 @@
             TX/RX FIFOs. Disposing releases the SM claim.
             </summary>
         </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.#ctor(nanoFramework.Hardware.Pico.Pio.PioBlock,System.Int32)">
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.#ctor(nanoFramework.Hardware.Pico.Pio.PioBlock,System.Int32,System.Boolean)">
             <summary>Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioStateMachine"/> class.</summary>
+            <param name="block">The owning PIO block.</param>
+            <param name="sm">The state-machine index (0..3).</param>
+            <param name="owned"><see langword="true"/> when this wrapper claimed the SM and must release it on dispose.</param>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Index">
             <summary>State machine index (0..3).</summary>
