@@ -582,7 +582,7 @@
             <returns>A program wrapping the supplied instructions and metadata.</returns>
             <exception cref="T:System.ArgumentNullException"><paramref name="instructions"/> or <paramref name="options"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentException"><paramref name="instructions"/> is empty or longer than 32 instructions.</exception>
-            <exception cref="T:System.ArgumentException"><paramref name="wrapTarget"/>/<paramref name="wrap"/> are outside the program, or an <paramref name="options"/> field is out of range.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="wrapTarget"/>/<paramref name="wrap"/> are outside the program, an <paramref name="options"/> field is out of range, or a fixed <see cref="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.Origin"/> cannot fit the program.</exception>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioProgramOptions">
             <summary>Program-level configuration for <see cref="M:nanoFramework.Hardware.Pico.Pio.PioProgram.FromEncoded(System.UInt16[],System.Int32,System.Int32,nanoFramework.Hardware.Pico.Pio.PioProgramOptions)"/>, mirroring what <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Build"/> captures.</summary>
