@@ -76,14 +76,14 @@ namespace Ws2812Sample
 
             asm.WrapTarget();
             asm.MarkLabel(bitloop);
-            asm.Out(PioDest.X, 1).Side(0).Delay(3);
+            asm.Out(DestinationOperand.RegisterX, 1).Side(0).Delay(3);
             asm.Jmp(PioCondition.XZero, doZero).Side(1).Delay(2);
             asm.Jmp(PioCondition.Always, bitloop).Side(1).Delay(2);
             asm.MarkLabel(doZero);
             asm.Nop().Side(0).Delay(2);
             asm.Wrap();
 
-            asm.OutShift(PioShiftDir.Left, autoPull: true, threshold: 24);
+            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 24);
             return asm.Build();
         }
     }

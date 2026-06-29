@@ -29,7 +29,7 @@ namespace EchoSample
             var asm = new PioAssembler();
             asm.WrapTarget();
             asm.Pull(ifEmpty: false, block: true); // TX FIFO -> OSR
-            asm.Mov(PioDest.Isr, PioSrc.Osr);      // OSR -> ISR
+            asm.Mov(DestinationOperand.InputShiftRegister, SourceOperand.OutputShiftRegister);      // OSR -> ISR
             asm.Push(ifFull: false, block: true);  // ISR -> RX FIFO
             asm.Wrap();
             PioProgram program = asm.Build();

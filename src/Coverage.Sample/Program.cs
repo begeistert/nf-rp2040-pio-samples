@@ -42,7 +42,7 @@ namespace CoverageSample
             var asm = new PioAssembler();
             asm.WrapTarget();
             asm.Pull(ifEmpty: false, block: true);
-            asm.Mov(PioDest.Isr, PioSrc.Osr);
+            asm.Mov(DestinationOperand.InputShiftRegister, SourceOperand.OutputShiftRegister);
             asm.Push(ifFull: false, block: true);
             asm.Wrap();
             PioProgram built = asm.Build();
@@ -51,7 +51,7 @@ namespace CoverageSample
                 Version = built.Version,
                 Origin = built.Origin,
                 SideSetCount = built.SideSetCount,
-                SideSetOpt = built.SideSetOpt,
+                SideSetOptional = built.SideSetOptional,
                 SideSetPinDirs = built.SideSetPinDirs,
                 OutShiftDir = built.OutShiftDir,
                 AutoPull = built.AutoPull,
@@ -97,8 +97,8 @@ namespace CoverageSample
             // band. That places 21 into RX without any TX push, so the test seeing 21 in RxOf — and never in
             // TxOf — proves Exec actually executed instructions.
             var enc = new PioAssembler();
-            enc.Set(PioDest.X, (int)ExecSentinel);
-            enc.In(PioSrc.X, 32);
+            enc.Set(DestinationOperand.RegisterX, (int)ExecSentinel);
+            enc.In(SourceOperand.RegisterX, 32);
             enc.Push(ifFull: false, block: true);
             ushort[] exec = enc.Build().Instructions;
             sm.Exec(exec[0]);
@@ -250,21 +250,21 @@ namespace CoverageSample
                 Version = PioVersion.Rp2350,
                 Origin = 5,
                 SideSetCount = 2,
-                SideSetOpt = true,
+                SideSetOptional = true,
                 SideSetPinDirs = true,
-                OutShiftDir = PioShiftDir.Left,
+                OutShiftDir = ShiftDirection.Left,
                 AutoPull = true,
                 PullThreshold = 8,
-                InShiftDir = PioShiftDir.Left,
+                InShiftDir = ShiftDirection.Left,
                 AutoPush = true,
                 PushThreshold = 16,
             };
             PioProgram fe = PioProgram.FromEncoded(feInstr, 0, 0, opts);
             PioProgram feDefault = PioProgram.FromEncoded(feInstr, 0, 0);
             FromEncodedOptionsOk =
-                (fe.Version == PioVersion.Rp2350 && fe.Origin == 5 && fe.SideSetCount == 2 && fe.SideSetOpt &&
-                 fe.SideSetPinDirs && fe.OutShiftDir == PioShiftDir.Left && fe.AutoPull && fe.PullThreshold == 8 &&
-                 fe.InShiftDir == PioShiftDir.Left && fe.AutoPush && fe.PushThreshold == 16 &&
+                (fe.Version == PioVersion.Rp2350 && fe.Origin == 5 && fe.SideSetCount == 2 && fe.SideSetOptional &&
+                 fe.SideSetPinDirs && fe.OutShiftDir == ShiftDirection.Left && fe.AutoPull && fe.PullThreshold == 8 &&
+                 fe.InShiftDir == ShiftDirection.Left && fe.AutoPush && fe.PushThreshold == 16 &&
                  !feDefault.AutoPull && feDefault.PullThreshold == 32 && feDefault.SideSetCount == 0) ? 1 : 0;
 
             Done = 1;

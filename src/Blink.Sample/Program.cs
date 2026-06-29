@@ -23,9 +23,9 @@ namespace BlinkSample
             PioLabel loop = asm.DefineLabel();
             asm.MarkLabel(loop);
             asm.Pull(ifEmpty: false, block: true);
-            asm.Out(PioDest.Pins, 1);
+            asm.Out(DestinationOperand.Pins, 1);
             asm.Jmp(PioCondition.Always, loop);
-            asm.OutShift(PioShiftDir.Right, autoPull: false, threshold: 32);
+            asm.OutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
             PioProgram program = asm.Build();
 
             PioBlock pio = Pio.Get(0);

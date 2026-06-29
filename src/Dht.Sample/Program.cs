@@ -121,12 +121,12 @@ namespace DhtSample
             PioLabel start = asm.DefineLabel();
             PioLabel samp = asm.DefineLabel();
 
-            asm.Set(PioDest.PinDirs, 1);
-            asm.Set(PioDest.Pins, 0);
-            asm.Set(PioDest.X, 31);
+            asm.Set(DestinationOperand.PinDirs, 1);
+            asm.Set(DestinationOperand.Pins, 0);
+            asm.Set(DestinationOperand.RegisterX, 31);
             asm.MarkLabel(start);
             asm.Jmp(PioCondition.XPostDec, start).Delay(31);
-            asm.Set(PioDest.PinDirs, 0);
+            asm.Set(DestinationOperand.PinDirs, 0);
             asm.WaitPin(true, 0);   // line floats up on the pull-up after release
             asm.WaitPin(false, 0);  // sensor pulls low (response)
             asm.WaitPin(true, 0);   // sensor's high response
@@ -134,13 +134,13 @@ namespace DhtSample
             asm.WrapTarget();
             asm.WaitPin(false, 0);
             asm.WaitPin(true, 0);
-            asm.Set(PioDest.X, 14);
+            asm.Set(DestinationOperand.RegisterX, 14);
             asm.MarkLabel(samp);
             asm.Jmp(PioCondition.XPostDec, samp).Delay(2);
-            asm.In(PioSrc.Pins, 1);
+            asm.In(SourceOperand.Pins, 1);
             asm.Wrap();
 
-            asm.InShift(PioShiftDir.Left, autoPush: true, threshold: 8);
+            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 8);
             return asm.Build();
         }
     }

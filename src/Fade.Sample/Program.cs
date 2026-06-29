@@ -26,11 +26,11 @@ namespace FadeSample
             //       jmp skip   side 1   ; counter reached duty -> pin high for the rest of the period
             // noset: nop
             // skip:  jmp y-- loop
-            var asm = new PioAssembler(new PioAssemblerOptions { SideSetCount = 1, SideSetOpt = true });
+            var asm = new PioAssembler(new PioAssemblerOptions { SideSetCount = 1, SideSetOption = true });
             PioLabel loop = asm.DefineLabel(), noset = asm.DefineLabel(), skip = asm.DefineLabel();
             asm.Pull(ifEmpty: false, block: false).Side(0);
-            asm.Mov(PioDest.X, PioSrc.Osr);
-            asm.Set(PioDest.Y, 31);
+            asm.Mov(DestinationOperand.RegisterX, SourceOperand.OutputShiftRegister);
+            asm.Set(DestinationOperand.RegisterY, 31);
             asm.MarkLabel(loop);
             asm.Jmp(PioCondition.XNotEqualY, noset);
             asm.Jmp(PioCondition.Always, skip).Side(1);
