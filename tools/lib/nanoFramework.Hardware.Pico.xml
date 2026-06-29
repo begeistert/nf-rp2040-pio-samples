@@ -790,6 +790,22 @@
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Finalize">
             <summary>Releases the SM claim if the instance is collected without an explicit Dispose.</summary>
         </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Read(System.UInt32[],System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Reads <paramref name="count"/> words from the RX FIFO into <paramref name="buffer"/> using a
+            DMA channel paced by this state machine's RX request. Blocks the calling thread but yields the
+            CLR while the transfer runs, so other threads keep running (no busy-wait, no FIFO overflow).
+            </summary>
+            <param name="buffer">Destination array.</param>
+            <param name="offset">Index in <paramref name="buffer"/> at which to start writing.</param>
+            <param name="count">Number of 32-bit words to read.</param>
+            <param name="timeoutMs">Maximum time to wait, in milliseconds.</param>
+            <returns>The number of words actually transferred (less than <paramref name="count"/> on timeout).</returns>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="buffer"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The range falls outside <paramref name="buffer"/>, or an argument is negative.</exception>
+            <exception cref="T:System.InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
+        </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig">
             <summary>
             Fluent configuration for a PIO state machine. Seed it from an assembled program

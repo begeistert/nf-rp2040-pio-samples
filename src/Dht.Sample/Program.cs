@@ -30,6 +30,9 @@ namespace DhtSample
         public static int Reads;
         public static bool LastChecksumOk;
 
+        // DMA destination for one frame (5 words, low byte each).
+        private static readonly uint[] FrameWords = new uint[5];
+
         public static void Main()
         {
             PioProgram program = BuildDht();
@@ -71,23 +74,19 @@ namespace DhtSample
             }
         }
 
-        // Reads the five bytes the SM pushes (humidity hi/lo, temp hi/lo, checksum). Each TryGet is
-        // bounded so a missing/!=present sensor can never hang the app.
+        // Reads the five bytes the SM pushes (humidity hi/lo, temp hi/lo, checksum). A single DMA
+        // transfer drains the whole frame while the thread yields -- no busy-spin, and the FIFO can't
+        // overflow under scheduling jitter the way the per-byte TryGet loop could.
         private static bool ReadFrame(PioStateMachine sm, byte[] data)
         {
+            if (sm.Read(FrameWords, 0, 5, timeoutMs: 50) != 5)
+            {
+                return false; // no sensor / no response
+            }
+
             for (int i = 0; i < 5; i++)
             {
-                int guard = 0;
-                uint word;
-                while (!sm.TryGet(out word))
-                {
-                    if (++guard > 200000)
-                    {
-                        return false; // no sensor / no response
-                    }
-                }
-
-                data[i] = (byte)(word & 0xFF);
+                data[i] = (byte)(FrameWords[i] & 0xFF);
             }
 
             return true;
