@@ -20,8 +20,13 @@
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Private=true forces mscorlib into ReferenceCopyLocalPaths, which is what makes the MDP
+         targets copy mscorlib.pe next to the app's own .pe. Without it the deployment is missing the
+         core library and the CLR silently refuses to run the app: the type system fails to resolve
+         and execution never reaches Main. -->
     <Reference Include="mscorlib">
       <HintPath>$(MSBuildThisFileDirectory)..\..\tools\nf\corelib\mscorlib.dll</HintPath>
+      <Private>true</Private>
     </Reference>
     <Reference Include="nanoFramework.Runtime.Events">
       <HintPath>$(MSBuildThisFileDirectory)..\..\tools\lib\nanoFramework.Runtime.Events.dll</HintPath>
