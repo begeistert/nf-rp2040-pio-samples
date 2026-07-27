@@ -13,8 +13,11 @@
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.Pio.Get(System.Int32)">
             <summary>
-            Gets the PIO block at <paramref name="index"/> (0 or 1; 2 is RP2350-only).
+            Gets the PIO block at the specified index.
             </summary>
+            <param name="index">The PIO block index (0 or 1; 2 is RP2350-only).</param>
+            <returns>The <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> instance for the specified index.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is less than 0 or exceeds the number of available PIO blocks.</exception>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioAssembler">
             <summary>
@@ -24,115 +27,222 @@
             </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.#ctor">
-            <summary>Creates an assembler with default options (no side-set, RP2040).</summary>
+            <summary>
+            Creates an assembler with default options (no side-set, RP2040).
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.#ctor(nanoFramework.Hardware.Pico.Pio.PioAssemblerOptions)">
-            <summary>Creates an assembler with the given options.</summary>
+            <summary>
+            Creates an assembler with the given options.
+            </summary>
+            <param name="options">The assembler options.</param>
             <exception cref="T:System.ArgumentException">SideSetCount must be 0..5.</exception>
             <exception cref="T:System.ArgumentException">Side-set (count + optional enable bit) cannot exceed 5 bits.</exception>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioAssembler.MaxDelay">
-            <summary>Maximum delay encodable per instruction given the side-set configuration.</summary>
+            <summary>
+            Maximum delay encodable per instruction given the side-set configuration.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioAssembler.Count">
-            <summary>Number of instructions emitted so far (the current program offset).</summary>
+            <summary>
+            Number of instructions emitted so far (the current program offset).
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.DefineLabel">
-            <summary>Allocates an unbound label. Place it later with <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MarkLabel(nanoFramework.Hardware.Pico.Pio.PioLabel)"/>.</summary>
+            <summary>
+            Allocates an unbound label. Place it later with <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MarkLabel(nanoFramework.Hardware.Pico.Pio.PioLabel)"/>.
+            </summary>
+            <returns>The created <see cref="T:nanoFramework.Hardware.Pico.Pio.PioLabel"/>.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MarkLabel(nanoFramework.Hardware.Pico.Pio.PioLabel)">
-            <summary>Binds a label to the current program offset.</summary>
+            <summary>
+            Binds a label to the current program offset.
+            </summary>
             <param name="label">The label to bind, created by this assembler's <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.DefineLabel"/>.</param>
             <exception cref="T:System.ArgumentNullException"><paramref name="label"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentException"><paramref name="label"/> belongs to another assembler.</exception>
             <exception cref="T:System.InvalidOperationException">Label already marked.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.WrapTarget">
-            <summary>Marks the wrap-target (PC wraps back here). Defaults to offset 0.</summary>
+            <summary>
+            Marks the wrap-target (PC wraps back here). Defaults to offset 0.
+            </summary>
             <exception cref="T:System.InvalidOperationException">.wrap_target already set.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Wrap">
-            <summary>Marks the wrap point (the last instruction that wraps). Defaults to the final instruction.</summary>
+            <summary>
+            Marks the wrap point (the last instruction that wraps). Defaults to the final instruction.
+            </summary>
             <exception cref="T:System.InvalidOperationException">.wrap requires at least one instruction.</exception>
             <exception cref="T:System.InvalidOperationException">.wrap already set.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.SetOrigin(System.Int32)">
-            <summary>Pins the program to a fixed load offset 0..31 (default: relocatable, -1).</summary>
+            <summary>
+            Pins the program to a fixed load offset 0..31 (default: relocatable, -1).
+            </summary>
+            <param name="origin">The load offset.</param>
             <exception cref="T:System.ArgumentException">Origin must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.OutShift(nanoFramework.Hardware.Pico.Pio.ShiftDirection,System.Boolean,System.Int32)">
-            <summary>Default OUT/pull shift behavior (equivalent to pioasm <c>.out</c>).</summary>
+            <summary>
+            Default OUT/pull shift behavior (equivalent to pioasm <c>.out</c>).
+            </summary>
+            <param name="direction">The shift direction.</param>
+            <param name="autoPull">Indicates whether to automatically pull data.</param>
+            <param name="threshold">The threshold for automatic pulling.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.InShift(nanoFramework.Hardware.Pico.Pio.ShiftDirection,System.Boolean,System.Int32)">
-            <summary>Default IN/push shift behavior (equivalent to pioasm <c>.in</c>).</summary>
+            <summary>
+            Default IN/push shift behavior (equivalent to pioasm <c>.in</c>).
+            </summary>
+            <param name="direction">The shift direction.</param>
+            <param name="autoPush">Indicates whether to automatically push data.</param>
+            <param name="threshold">The threshold for automatic pushing.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Jmp(nanoFramework.Hardware.Pico.Pio.PioLabel)">
-            <summary>Jmp &lt;label&gt; (unconditional).</summary>
+            <summary>
+            Jmp &lt;label&gt; (unconditional).
+            </summary>
+            <param name="target">The label to jump to.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Jmp(nanoFramework.Hardware.Pico.Pio.PioCondition,nanoFramework.Hardware.Pico.Pio.PioLabel)">
-            <summary>Jmp &lt;cond&gt; &lt;label&gt;.</summary>
+            <summary>
+            Jmp &lt;cond&gt; &lt;label&gt;.
+            </summary>
+            <param name="condition">The condition for the jump.</param>
+            <param name="target">The label to jump to.</param>
+            <returns>The instruction reference.</returns>
             <exception cref="T:System.ArgumentNullException"><paramref name="target"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentException"><paramref name="target"/> belongs to another assembler.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Jmp(nanoFramework.Hardware.Pico.Pio.PioCondition,System.Int32)">
-            <summary>Jmp to an absolute program offset.</summary>
+            <summary>
+            Jmp to an absolute program offset.
+            </summary>
+            <param name="condition">The condition for the jump.</param>
+            <param name="address">The absolute address to jump to.</param>
+            <returns>The instruction reference.</returns>
             <exception cref="T:System.ArgumentException">Jump address must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Wait(System.Boolean,nanoFramework.Hardware.Pico.Pio.PioWaitSource,System.Int32)">
-            <summary>Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.</summary>
+            <summary>
+            Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.
+            </summary>
+            <param name="polarity">The polarity of the wait condition.</param>
+            <param name="source">The source of the wait condition.</param>
+            <param name="index">The index for the wait condition.</param>
+            <returns>The instruction reference.</returns>
             <exception cref="T:System.ArgumentException">Wait index must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.WaitGpio(System.Boolean,System.Int32)">
             <summary>Wait for an absolute GPIO to reach <paramref name="level"/>.</summary>
+            <param name="level">The level to wait for.</param>
+            <param name="gpio">The GPIO to wait for.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.WaitPin(System.Boolean,System.Int32)">
             <summary>Wait for an IN-base-relative pin to reach <paramref name="level"/>.</summary>
+            <param name="level">The level to wait for.</param>
+            <param name="pin">The pin to wait for.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.WaitIrq(System.Boolean,System.Int32)">
             <summary>Wait for IRQ flag <paramref name="irq"/> (0..7) to reach <paramref name="level"/>.</summary>
+            <param name="level">The level to wait for.</param>
+            <param name="irq">The IRQ flag to wait for.</param>
+            <returns>The instruction reference.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="irq"/> is not in the range 0..7.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.In(nanoFramework.Hardware.Pico.Pio.SourceOperand,System.Int32)">
             <summary>IN &lt;source&gt;, &lt;bitCount&gt; (1..32).</summary>
+            <param name="source">The source for the IN instruction.</param>
+            <param name="bitCount">The number of bits to read.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Out(nanoFramework.Hardware.Pico.Pio.DestinationOperand,System.Int32)">
             <summary>Out &lt;dest&gt;, &lt;bitCount&gt; (1..32).</summary>
+            <param name="dest">The destination for the Out instruction.</param>
+            <param name="bitCount">The number of bits to write.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Push(System.Boolean,System.Boolean)">
             <summary>Push [iffull] [block].</summary>
+            <param name="ifFull">Indicates whether to push if full.</param>
+            <param name="block">Indicates whether to block.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Pull(System.Boolean,System.Boolean)">
             <summary>Pull [ifempty] [block].</summary>
+            <param name="ifEmpty">Indicates whether to pull if empty.</param>
+            <param name="block">Indicates whether to block.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Mov(nanoFramework.Hardware.Pico.Pio.DestinationOperand,nanoFramework.Hardware.Pico.Pio.SourceOperand)">
             <summary>Mov &lt;dest&gt;, &lt;src&gt;.</summary>
+            <param name="dest">The destination for the MOV instruction.</param>
+            <param name="src">The source for the MOV instruction.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Mov(nanoFramework.Hardware.Pico.Pio.DestinationOperand,nanoFramework.Hardware.Pico.Pio.PioMovOp,nanoFramework.Hardware.Pico.Pio.SourceOperand)">
             <summary>Mov &lt;dest&gt;, &lt;op&gt; &lt;src&gt;.</summary>
+            <param name="dest">The destination for the MOV instruction.</param>
+            <param name="op">The operation for the MOV instruction.</param>
+            <param name="src">The source for the MOV instruction.</param>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MovToRxFifo(System.Int32)">
-            <summary>(RP2350/PIO v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.</summary>
+            <summary>
+            (RP2350/PIO v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.
+            </summary>
+            <param name="index">The RX FIFO index (0..3).</param>
+            <returns>The instruction reference.</returns>
             <exception cref="T:System.ArgumentException">RX FIFO index must be 0..3.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MovToRxFifoIndexedY">
-            <summary>(RP2350/PIO v1) MOV RXFIFO[Y], ISR — write ISR to the slot selected by Y.</summary>
+            <summary>
+            (RP2350/PIO v1) MOV RXFIFO[Y], ISR — write ISR to the slot selected by Y.
+            </summary>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MovFromRxFifo(System.Int32)">
-            <summary>(RP2350/PIO v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.</summary>
+            <summary>
+            (RP2350/PIO v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.
+            </summary>
+            <param name="index">The RX FIFO index (0..3).</param>
             <exception cref="T:System.ArgumentException">RX FIFO index must be 0..3.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.MovFromRxFifoIndexedY">
-            <summary>(RP2350/PIO v1) MOV OSR, RXFIFO[Y] — read the slot selected by Y into OSR.</summary>
+            <summary>
+            (RP2350/PIO v1) MOV OSR, RXFIFO[Y] — read the slot selected by Y into OSR.
+            </summary>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Irq(System.Int32,System.Boolean,System.Boolean)">
-            <summary>IRQ &lt;index&gt; [clear] [wait].</summary>
+            <summary>
+            IRQ &lt;index&gt; [clear] [wait].
+            </summary>
+            <param name="index">The IRQ index (0..7).</param>
+            <param name="clear">Indicates whether to clear the IRQ.</param>
+            <param name="wait">Indicates whether to wait for the IRQ.</param>
+            <returns>The instruction reference.</returns>
             <exception cref="T:System.ArgumentException">IRQ index must be 0..7.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Set(nanoFramework.Hardware.Pico.Pio.DestinationOperand,System.Int32)">
-            <summary>Set &lt;dest&gt;, &lt;value&gt; (0..31).</summary>
+            <summary>
+            Set &lt;dest&gt;, &lt;value&gt; (0..31).
+            </summary>
+            <param name="dest">The destination for the Set instruction.</param>
+            <param name="value">The value to set (0..31).</param>
+            <returns>The instruction reference.</returns>
             <exception cref="T:System.ArgumentException">Set value must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Nop">
-            <summary>Nop (alias of MOV Y, Y).</summary>
+            <summary>
+            Nop (alias of MOV Y, Y).
+            </summary>
+            <returns>The instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Build">
             <summary>
@@ -145,12 +255,16 @@
             <exception cref="T:System.InvalidOperationException">Unbound label referenced by JMP at offset </exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.ApplyDelay(System.Int32,System.Int32)">
-            <summary>Attaches a post-instruction delay to a slot. Called back from <see cref="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef"/> by index.</summary>
+            <summary>
+            Attaches a post-instruction delay to a slot. Called back from <see cref="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef"/> by index.
+            </summary>
             <param name="index">The instruction slot index.</param>
             <param name="cycles">The number of delay cycles to attach.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.ApplySide(System.Int32,System.Int32)">
-            <summary>Attaches a side-set value to a slot. Called back from <see cref="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef"/> by index.</summary>
+            <summary>
+            Attaches a side-set value to a slot. Called back from <see cref="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef"/> by index.
+            </summary>
             <param name="index">The instruction slot index.</param>
             <param name="value">The side-set value to drive.</param>
         </member>
@@ -158,21 +272,29 @@
             <summary>Construction-time options for <see cref="T:nanoFramework.Hardware.Pico.Pio.PioAssembler"/>.</summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioAssemblerOptions.Version">
-            <summary>Gets or sets the target PIO version. RP2350 unlocks v1-only instructions.</summary>
+            <summary>
+            Gets or sets the target PIO version. RP2350 unlocks v1-only instructions.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioAssemblerOptions.SideSetCount">
-            <summary>Gets or sets the side-set value-bit count (0..5). Reduces the per-instruction delay range.</summary>
+            <summary>
+            Gets or sets the side-set value-bit count (0..5). Reduces the per-instruction delay range.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioAssemblerOptions.SideSetOption">
-            <summary>Gets or sets a value indicating whether side-set is optional and an enable bit is reserved.</summary>
+            <summary>
+            Gets or sets a value indicating whether side-set is optional and an enable bit is reserved.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioAssemblerOptions.SideSetPinDirs">
-            <summary>Gets or sets a value indicating whether side-set drives PINDIRS instead of PINS.</summary>
+            <summary>
+            Gets or sets a value indicating whether side-set drives PINDIRS instead of PINS.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioInterruptEventHandler">
             <summary>
             Handles a PIO interrupt raised on a block. <paramref name="flags"/> is the bit mask of
-            state-machine IRQ flags (0..3) that fired (bit <c>n</c> set means SM-relative <c>irq n</c>).
+            state-machine IRQ flags (0..3) that fired (bit <c>n</c> set means state-machine-relative <c>irq n</c>).
             </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioBlock">
@@ -182,10 +304,15 @@
             </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.#ctor(System.Int32)">
-            <summary>Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> class.</summary>
+            <summary>
+            Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> class.
+            </summary>
+            <param name="index">The index of the block.</param>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioBlock.Index">
-            <summary>Block index (0..2).</summary>
+            <summary>
+            Block index (0..2 for Pico 1 and 0..3 for Pico 2).
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.AddProgram(nanoFramework.Hardware.Pico.Pio.PioProgram)">
             <summary>
@@ -198,23 +325,30 @@
             <exception cref="T:System.InvalidOperationException">There is no room left in the block to load the program.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.RemoveProgram(nanoFramework.Hardware.Pico.Pio.PioProgram,System.UInt32)">
-            <summary>Removes a previously added program (maps to <c>pio_remove_program</c>).</summary>
+            <summary>
+            Removes a previously added program (maps to <c>pio_remove_program</c>).
+            </summary>
             <param name="program">The program previously returned by <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.AddProgram(nanoFramework.Hardware.Pico.Pio.PioProgram)"/>.</param>
             <param name="offset">The load offset the program occupies.</param>
             <exception cref="T:System.ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="offset"/> plus the program length exceeds the 32-word instruction memory.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine">
-            <summary>Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).</summary>
+            <summary>
+            Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).
+            </summary>
             <returns>The newly claimed state machine.</returns>
             <exception cref="T:System.InvalidOperationException">All four state machines on the block are already claimed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.StateMachine(System.Int32)">
             <summary>
             Gets a specific state machine (0..3) on this block. Unlike <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine"/>
-            this does <em>not</em> mark the SM as claimed, so the caller is responsible for avoiding
-            collisions; prefer <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine"/> unless a fixed SM index is required.
+            this does <em>not</em> mark the state machine as claimed, so the caller is responsible for avoiding
+            collisions; prefer <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine"/> unless a fixed state machine index is required.
             </summary>
+            <param name="stateMachine">The state machine index (0..3).</param>
+            <returns>The state machine instance.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="stateMachine"/> is less than 0 or greater than 3.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.InitGpio(System.Int32)">
             <summary>
@@ -222,18 +356,37 @@
             <c>pio_gpio_init</c>: sets the pad's function select to PIO0/PIO1). Required before a
             pin mapped via OUT/SET/side-set/IN actually reaches the physical pad.
             </summary>
+            <param name="pin">The GPIO to route.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than 47.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.InitGpioRange(System.Int32,System.Int32)">
-            <summary>Routes <paramref name="count"/> consecutive GPIOs from <paramref name="basePin"/> to this block.</summary>
+            <summary>
+            Routes <paramref name="count"/> consecutive GPIOs from <paramref name="basePin"/> to this block.
+            </summary>
             <param name="basePin">The first GPIO to route.</param>
             <param name="count">The number of consecutive GPIOs to route.</param>
             <exception cref="T:System.ArgumentOutOfRangeException">The span falls outside 0..47.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ForceIrq(System.Int32)">
-            <summary>Raises PIO IRQ flag <paramref name="irq"/> (0..7) from the CPU side (maps to IRQ_FORCE).</summary>
+            <summary>
+            Raises PIO IRQ flag <paramref name="irq"/> (0..7) from the CPU side (maps to IRQ_FORCE).
+            </summary>
+            <param name="irq">The IRQ flag to raise.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="irq"/> is less than 0 or greater than 7.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClearIrq(System.Int32)">
-            <summary>Clears PIO IRQ flag <paramref name="irq"/> (0..7), e.g. one raised by a state machine's <c>irq</c>.</summary>
+            <summary>
+            Clears PIO IRQ flag <paramref name="irq"/> (0..7), e.g. one raised by a state machine's <c>irq</c>.
+            </summary>
+            <param name="irq">The IRQ flag to clear.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="irq"/> is less than 0 or greater than 7.</exception>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.OnInterruptInternal(nanoFramework.Hardware.Pico.Pio.PioInterruptFlags)">
+            <summary>
+            Raises the <see cref="E:nanoFramework.Hardware.Pico.Pio.PioBlock.Interrupt"/> event on the event thread with the given IRQ flags. Called by the
+            <see cref="T:nanoFramework.Hardware.Pico.Pio.PioEventListener"/> when a native PIO IRQ is delivered. Not intended for direct use by application code.
+            </summary>
+            <param name="flags">The IRQ flags.</param>
         </member>
         <member name="E:nanoFramework.Hardware.Pico.Pio.PioBlock.Interrupt">
             <summary>
@@ -244,31 +397,49 @@
             </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioCondition">
-            <summary>Jmp condition (3-bit field).</summary>
+            <summary>
+            Jmp condition (3-bit field).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.Always">
-            <summary>Always jump (unconditional).</summary>
+            <summary>
+            Always jump (unconditional).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.XZero">
-            <summary>!X — X is zero.</summary>
+            <summary>
+            !X — X is zero.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.XPostDec">
-            <summary>X-- — X is non-zero prior to decrement, then decrement.</summary>
+            <summary>
+            X-- — X is non-zero prior to decrement, then decrement.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.YZero">
-            <summary>!Y — Y is zero.</summary>
+            <summary>
+            !Y — Y is zero.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.YPostDec">
-            <summary>Y-- — Y is non-zero prior to decrement, then decrement.</summary>
+            <summary>
+            Y-- — Y is non-zero prior to decrement, then decrement.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.XNotEqualY">
-            <summary>X != Y.</summary>
+            <summary>
+            X != Y.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.Pin">
-            <summary>PIN — the JMP pin is high.</summary>
+            <summary>
+            PIN — the JMP pin is high.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioCondition.OsrNotEmpty">
-            <summary>!OSRE — output shift register is not empty.</summary>
+            <summary>
+            !OSRE — output shift register is not empty.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.DestinationOperand">
             <summary>Destination operand. The legal subset depends on the instruction (validated at emit time).</summary>
@@ -312,81 +483,164 @@
             </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpJmp">
-            <summary>Base opcode for the JMP instruction.</summary>
+            <summary>
+            Base opcode for the JMP instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpWait">
-            <summary>Base opcode for the WAIT instruction.</summary>
+            <summary>
+            Base opcode for the WAIT instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpIn">
-            <summary>Base opcode for the IN instruction.</summary>
+            <summary>
+            Base opcode for the IN instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpOut">
-            <summary>Base opcode for the OUT instruction.</summary>
+            <summary>
+            Base opcode for the OUT instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpPush">
-            <summary>Base opcode for the PUSH instruction.</summary>
+            <summary>
+            Base opcode for the PUSH instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpPull">
-            <summary>Base opcode for the PULL instruction.</summary>
+            <summary>
+            Base opcode for the PULL instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpMov">
-            <summary>Base opcode for the MOV instruction.</summary>
+            <summary>
+            Base opcode for the MOV instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpIrq">
-            <summary>Base opcode for the IRQ instruction.</summary>
+            <summary>
+            Base opcode for the IRQ instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioEncoder.OpSet">
-            <summary>Base opcode for the SET instruction.</summary>
+            <summary>
+            Base opcode for the SET instruction.
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Jmp(nanoFramework.Hardware.Pico.Pio.PioCondition,System.Int32)">
-            <summary>Jmp &lt;cond&gt; &lt;addr&gt;. Address is an absolute program offset 0..31.</summary>
+            <summary>
+            Jmp &lt;cond&gt; &lt;addr&gt;. Address is an absolute program offset 0..31.
+            </summary>
+            <param name="condition">The jump condition.</param>
+            <param name="address">The absolute program offset to jump to (0..31).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="address"/> is outside 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Wait(System.Boolean,nanoFramework.Hardware.Pico.Pio.PioWaitSource,System.Int32)">
-            <summary>Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.</summary>
+            <summary>
+            Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.
+            </summary>
+            <param name="polarity">The polarity of the wait signal.</param>
+            <param name="source">The source of the wait signal.</param>
+            <param name="index">The index of the wait signal (0..31).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.In(nanoFramework.Hardware.Pico.Pio.SourceOperand,System.Int32)">
-            <summary>IN &lt;source&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).</summary>
+            <summary>
+            IN &lt;source&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).
+            </summary>
+            <param name="source">The source of the input signal.</param>
+            <param name="bitCount">The number of bits to input (1..32).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="bitCount"/> is outside 1..32.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Out(nanoFramework.Hardware.Pico.Pio.DestinationOperand,System.Int32)">
-            <summary>Out &lt;dest&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).</summary>
+            <summary>
+            Out &lt;dest&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).
+            </summary>
+            <param name="dest">The destination of the output signal.</param>
+            <param name="bitCount">The number of bits to output (1..32).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="bitCount"/> is outside 1..32.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Push(System.Boolean,System.Boolean)">
-            <summary>Push [iffull] [block].</summary>
+            <summary>
+            Push [iffull] [block].
+            </summary>
+            <param name="ifFull">Indicates if the operation should be performed when the FIFO is full.</param>
+            <param name="block">Indicates if the operation should block.</param>
+            <returns>The encoded instruction.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Pull(System.Boolean,System.Boolean)">
-            <summary>Pull [ifempty] [block].</summary>
+            <summary>
+            Pull [ifempty] [block].
+            </summary>
+            <param name="ifEmpty">Indicates if the operation should be performed when the FIFO is empty.</param>
+            <param name="block">Indicates if the operation should block.</param>
+            <returns>The encoded instruction.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Mov(nanoFramework.Hardware.Pico.Pio.DestinationOperand,nanoFramework.Hardware.Pico.Pio.PioMovOp,nanoFramework.Hardware.Pico.Pio.SourceOperand)">
-            <summary>Mov &lt;dest&gt;, [op] &lt;src&gt;.</summary>
+            <summary>
+            Mov &lt;dest&gt;, [op] &lt;src&gt;.
+            </summary>
+            <param name="dest">The destination of the move operation.</param>
+            <param name="op">The operation to perform.</param>
+            <param name="src">The source of the move operation.</param>
+            <returns>The encoded instruction.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.MovToRxFifo(System.Int32)">
-            <summary>(v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.</summary>
+            <summary>
+            (v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.
+            </summary>
+            <param name="index">The RX FIFO slot index (0..3).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..3.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.MovToRxFifoIndexedY">
-            <summary>(v1) MOV RXFIFO[Y], ISR — write ISR to the RX FIFO slot selected by Y.</summary>
+            <summary>
+            (v1) MOV RXFIFO[Y], ISR — write ISR to the RX FIFO slot selected by Y.
+            </summary>
+            <returns>The encoded instruction.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.MovFromRxFifo(System.Int32)">
-            <summary>(v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.</summary>
+            <summary>
+            (v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.
+            </summary>
+            <param name="index">The RX FIFO slot index (0..3).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..3.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.MovFromRxFifoIndexedY">
-            <summary>(v1) MOV OSR, RXFIFO[Y] — read the RX FIFO slot selected by Y into OSR.</summary>
+            <summary>
+            (v1) MOV OSR, RXFIFO[Y] — read the RX FIFO slot selected by Y into OSR.
+            </summary>
+            <returns>The encoded instruction.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Irq(System.Boolean,System.Boolean,System.Int32)">
-            <summary>IRQ [clear] [wait] &lt;index&gt; (0..7).</summary>
+            <summary>
+            IRQ [clear] [wait] &lt;index&gt; (0..7).
+            </summary>
+            <param name="clear">Indicates if the IRQ should be cleared.</param>
+            <param name="wait">Indicates if the operation should wait for the IRQ.</param>
+            <param name="index">The IRQ index (0..7).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..7.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Set(nanoFramework.Hardware.Pico.Pio.DestinationOperand,System.Int32)">
-            <summary>Set &lt;dest&gt;, &lt;value&gt; (0..31).</summary>
+            <summary>
+            Set &lt;dest&gt;, &lt;value&gt; (0..31).
+            </summary>
+            <param name="dest">The destination of the set operation.</param>
+            <param name="value">The value to set (0..31).</param>
+            <returns>The encoded instruction.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="value"/> is outside 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.Nop">
-            <summary>Nop is an alias for MOV Y, Y.</summary>
+            <summary>
+            Nop is an alias for MOV Y, Y.
+            </summary>
+            <returns>The encoded instruction.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.DelayBits(System.Int32,System.Boolean)">
             <summary>
@@ -394,6 +648,9 @@
             The 5-bit [12:8] field is split: side-set value bits (plus one enable bit
             when optional) take the top, the remaining low bits are delay.
             </summary>
+            <param name="sideSetCount">The number of side-set value bits.</param>
+            <param name="sideSetOpt">Indicates if side-set is optional.</param>
+            <returns>The number of delay bits available.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioEncoder.PackDelaySideSet(System.UInt16,System.Int32,System.Int32,System.Boolean,System.Int32,System.Boolean)">
             <summary>
@@ -406,8 +663,62 @@
             <param name="sideUsed">Whether this instruction asserts a side-set value.</param>
             <param name="sideSetCount">Side-set value-bit count (excludes the opt enable bit).</param>
             <param name="sideSetOpt">Whether side-set is optional for this program.</param>
+            <returns>The opcode with the delay/side field layered on.</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="sideSetCount"/> (plus the optional enable bit) exceeds the 5-bit delay/side field.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="delay"/> or <paramref name="sideValue"/> does not fit its field.</exception>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioEvent.BlockIndex">
+            <summary>
+            The index of the PIO block (0, 1, or 2).
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioEvent.Flags">
+            <summary>
+            The state machine interrupt flags raised by the PIO block.
+            </summary>
+        </member>
+        <member name="T:nanoFramework.Hardware.Pico.Pio.PioEventListener">
+            <summary>
+            Listens for PIO events and dispatches them to the appropriate <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> instances.
+            </summary>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioEventListener.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioEventListener"/> class and registers it with the event sink.
+            </summary>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioEventListener.ProcessEvent(System.UInt32,System.UInt32,System.DateTime)">
+            <summary>
+            Processes the event data and creates a <see cref="T:nanoFramework.Hardware.Pico.Pio.PioEvent"/> instance.
+            </summary>
+            <param name="data1">The first data parameter.</param>
+            <param name="data2">The second data parameter.</param>
+            <param name="time">The time of the event.</param>
+            <returns>The processed event.</returns>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioEventListener.InitializeForEventSource">
+            <summary>
+            Initializes the event listener for the event source.
+            </summary>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioEventListener.OnEvent(nanoFramework.Runtime.Events.BaseEvent)">
+            <summary>
+            Handles the event by dispatching it to the appropriate <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> based on the block index.
+            </summary>
+            <param name="ev">The event to handle.</param>
+            <returns>The confirmation of event handling.</returns>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioEventListener.AddBlock(nanoFramework.Hardware.Pico.Pio.PioBlock)">
+            <summary>
+            Adds a <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> to the event listener for dispatching events.
+            </summary>
+            <param name="block">The <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> to add.</param>
+        </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioEventListener.RemoveBlock(System.Int32)">
+            <summary>
+            Removes a <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> from the event listener.
+            </summary>
+            <param name="blockIndex">The index of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> to remove.</param>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioFifoJoin">
             <summary>
@@ -417,22 +728,34 @@
             </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioFifoJoin.None">
-            <summary>Separate TX (depth 4) and RX (depth 4) FIFOs.</summary>
+            <summary>
+            Separate TX (depth 4) and RX (depth 4) FIFOs.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioFifoJoin.Tx">
-            <summary>TX FIFO depth 8, RX disabled.</summary>
+            <summary>
+            TX FIFO depth 8, RX disabled.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioFifoJoin.Rx">
-            <summary>RX FIFO depth 8, TX disabled.</summary>
+            <summary>
+            RX FIFO depth 8, TX disabled.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioFifoJoin.TxGet">
-            <summary>(v1) TX depth 4; RX storage is the processor-writable "get" register file.</summary>
+            <summary>
+            (v1) TX depth 4; RX storage is the processor-writable "get" register file.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioFifoJoin.TxPut">
-            <summary>(v1) TX depth 4; RX storage is the processor-readable "put" register file.</summary>
+            <summary>
+            (v1) TX depth 4; RX storage is the processor-readable "put" register file.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioFifoJoin.PutGet">
-            <summary>(v1) TX depth 4; RX storage is the SM-only "put"/"get" register file.</summary>
+            <summary>
+            (v1) TX depth 4; RX storage is the SM-only "put"/"get" register file.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef">
             <summary>
@@ -447,13 +770,25 @@
             </remarks>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioInstructionRef.#ctor(nanoFramework.Hardware.Pico.Pio.PioAssembler,System.Int32)">
-            <summary>Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef"/> class.</summary>
+            <summary>
+            Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioInstructionRef"/> class.
+            </summary>
+            <param name="owner">The owning assembler.</param>
+            <param name="index">The index of the instruction.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioInstructionRef.Delay(System.Int32)">
-            <summary>Sets the post-instruction delay in cycles (range checked at Build).</summary>
+            <summary>
+            Sets the post-instruction delay in cycles (range checked at Build).
+            </summary>
+            <param name="cycles">The number of cycles to delay.</param>
+            <returns>The updated instruction reference.</returns>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioInstructionRef.Side(System.Int32)">
-            <summary>Asserts a side-set value alongside this instruction.</summary>
+            <summary>
+            Asserts a side-set value alongside this instruction.
+            </summary>
+            <param name="value">The side-set value.</param>
+            <returns>The updated instruction reference.</returns>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioLabel">
             <summary>
@@ -466,39 +801,92 @@
             <summary>Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioLabel"/> class.</summary>
             <param name="id">The unique label identifier.</param>
             <param name="owner">The assembler that created this label.</param>
+            <remarks>Use <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.DefineLabel"/> to create labels.</remarks>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioLabel.Id">
-            <summary>Gets the unique identifier assigned to this label.</summary>
+            <summary>
+            Gets the unique identifier assigned to this label.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioLabel.Owner">
-            <summary>Gets the assembler that created this label.</summary>
+            <summary>
+            Gets the assembler that created this label.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioLabel.Address">
-            <summary>Gets or sets the program offset where the label was marked, or -1 if not yet bound.</summary>
+            <summary>
+            Gets or sets the program offset where the label was marked, or -1 if not yet bound.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioLabel.IsBound">
-            <summary>Gets <see langword="true"/> once the label has been placed in the instruction stream; otherwise, <see langword="false"/>.</summary>
+            <summary>
+            Gets <see langword="true"/> once the label has been placed in the instruction stream; otherwise, <see langword="false"/>.
+            </summary>
+        </member>
+        <member name="T:nanoFramework.Hardware.Pico.Pio.PioInterruptFlags">
+            <summary>
+            Specifies the state machine interrupt flags raised by a PIO block.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioInterruptFlags.None">
+            <summary>
+            No interrupt flags are set.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioInterruptFlags.Sm0">
+            <summary>
+            Interrupt flag for State Machine 0.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioInterruptFlags.Sm1">
+            <summary>
+            Interrupt flag for State Machine 1.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioInterruptFlags.Sm2">
+            <summary>
+            Interrupt flag for State Machine 2.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioInterruptFlags.Sm3">
+            <summary>
+            Interrupt flag for State Machine 3.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioMovOp">
-            <summary>Mov operation applied to the source before writing the destination.</summary>
+            <summary>
+            Mov operation applied to the source before writing the destination.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioMovOp.None">
-            <summary>No operation — the source is copied unchanged.</summary>
+            <summary>
+            No operation — the source is copied unchanged.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioMovOp.Invert">
-            <summary>Bitwise NOT ("!" / "~").</summary>
+            <summary>
+            Bitwise NOT ("!" / "~").
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioMovOp.BitReverse">
-            <summary>Bit reverse ("::").</summary>
+            <summary>
+            Bit reverse ("::").
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioMovStatusSel">
-            <summary>FIFO selected by the EXECCTRL status source for the <c>mov ..., status</c> instruction.</summary>
+            <summary>
+            FIFO selected by the EXECCTRL status source for the <c>mov ..., status</c> instruction.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioMovStatusSel.TxLevel">
-            <summary>Status is all-ones when the TX FIFO level is below N.</summary>
+            <summary>
+            Status is all-ones when the TX FIFO level is below N.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioMovStatusSel.RxLevel">
-            <summary>Status is all-ones when the RX FIFO level is below N.</summary>
+            <summary>
+            Status is all-ones when the RX FIFO level is below N.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioProgram">
             <summary>
@@ -508,52 +896,98 @@
             </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.Instructions">
-            <summary>Encoded 16-bit instruction words (length &lt;= 32).</summary>
+            <summary>
+            Encoded 16-bit instruction words (length &lt;= 32).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.Length">
-            <summary>Number of instructions.</summary>
+            <summary>
+            Number of instructions.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.Wrap">
-            <summary>PC value that wraps back to <see cref="P:nanoFramework.Hardware.Pico.Pio.PioProgram.WrapTarget"/> (last instruction by default).</summary>
+            <summary>
+            PC value that wraps back to <see cref="P:nanoFramework.Hardware.Pico.Pio.PioProgram.WrapTarget"/> (last instruction by default).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.WrapTarget">
-            <summary>PC value wrapped to (0 by default).</summary>
+            <summary>
+            PC value wrapped to (0 by default).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.Origin">
-            <summary>Fixed load offset 0..31, or -1 when relocatable.</summary>
+            <summary>
+            Fixed load offset 0..31, or -1 when relocatable.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.SideSetCount">
-            <summary>Side-set value-bit count (excludes the optional enable bit).</summary>
+            <summary>
+            Side-set value-bit count (excludes the optional enable bit).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.SideSetOptional">
-            <summary>Whether side-set is optional (an extra enable bit is reserved).</summary>
+            <summary>
+            Whether side-set is optional (an extra enable bit is reserved).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.SideSetPinDirs">
-            <summary>Whether side-set targets PINDIRS instead of PINS.</summary>
+            <summary>
+            Whether side-set targets PINDIRS instead of PINS.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.OutShiftDir">
-            <summary>Out/pull shift direction default.</summary>
+            <summary>
+            Out/pull shift direction default.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.AutoPull">
-            <summary>Whether autopull is enabled by default.</summary>
+            <summary>
+            Whether autopull is enabled by default.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.PullThreshold">
-            <summary>Autopull threshold in bits (1..32).</summary>
+            <summary>
+            Autopull threshold in bits (1..32).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.InShiftDir">
-            <summary>IN/push shift direction default.</summary>
+            <summary>
+            IN/push shift direction default.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.AutoPush">
-            <summary>Whether autopush is enabled by default.</summary>
+            <summary>
+            Whether autopush is enabled by default.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.PushThreshold">
-            <summary>Autopush threshold in bits (1..32).</summary>
+            <summary>
+            Autopush threshold in bits (1..32).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgram.Version">
-            <summary>Minimum PIO version required to run this program.</summary>
+            <summary>
+            Minimum PIO version required to run this program.
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioProgram.#ctor(System.UInt16[],System.Int32,System.Int32,System.SByte,System.Int32,System.Boolean,System.Boolean,nanoFramework.Hardware.Pico.Pio.ShiftDirection,System.Boolean,System.Int32,nanoFramework.Hardware.Pico.Pio.ShiftDirection,System.Boolean,System.Int32,nanoFramework.Hardware.Pico.Pio.PioVersion)">
-            <summary>Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioProgram"/> class.</summary>
+            <summary>
+            Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioProgram"/> class.
+            </summary>
+            <param name="instructions">The encoded 16-bit PIO instructions (1..32).</param>
+            <param name="wrap">The wrap instruction index.</param>
+            <param name="wrapTarget">The wrap-target instruction index.</param>
+            <param name="origin">The fixed load offset 0..31, or -1 when relocatable.</param>
+            <param name="sideSetCount">The side-set value-bit count (excludes the optional enable bit).</param>
+            <param name="sideSetOpt">Whether side-set is optional (an extra enable bit is reserved).</param>
+            <param name="sideSetPinDirs">Whether side-set targets PINDIRS instead of PINS.</param>
+            <param name="outShiftDir">The out/pull shift direction default.</param>
+            <param name="autoPull">Whether autopull is enabled by default.</param>
+            <param name="pullThreshold">The autopull threshold in bits (1..32).</param>
+            <param name="inShiftDir">The IN/push shift direction default.</param>
+            <param name="autoPush">Whether autopush is enabled by default.</param>
+            <param name="pushThreshold">The autopush threshold in bits (1..32).</param>
+            <param name="version">The minimum PIO version required to run this program.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioProgram.FromEncoded(System.UInt16[],System.Int32,System.Int32)">
             <summary>
@@ -585,73 +1019,120 @@
             <exception cref="T:System.ArgumentException"><paramref name="wrapTarget"/>/<paramref name="wrap"/> are outside the program, an <paramref name="options"/> field is out of range, or a fixed <see cref="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.Origin"/> cannot fit the program.</exception>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioProgramOptions">
-            <summary>Program-level configuration for <see cref="M:nanoFramework.Hardware.Pico.Pio.PioProgram.FromEncoded(System.UInt16[],System.Int32,System.Int32,nanoFramework.Hardware.Pico.Pio.PioProgramOptions)"/>, mirroring what <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Build"/> captures.</summary>
+            <summary>
+            Program-level configuration for <see cref="M:nanoFramework.Hardware.Pico.Pio.PioProgram.FromEncoded(System.UInt16[],System.Int32,System.Int32,nanoFramework.Hardware.Pico.Pio.PioProgramOptions)"/>, 
+            mirroring what <see cref="M:nanoFramework.Hardware.Pico.Pio.PioAssembler.Build"/> captures.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.Version">
-            <summary>Gets or sets the target PIO version. RP2350 unlocks v1-only instructions.</summary>
+            <summary>
+            Gets or sets the target PIO version. RP2350 unlocks v1-only instructions.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.Origin">
-            <summary>Gets or sets the load origin (absolute instruction-memory offset), or -1 to let the loader place the program.</summary>
+            <summary>
+            Gets or sets the load origin (absolute instruction-memory offset), or -1 to let the loader place the program.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.SideSetCount">
-            <summary>Gets or sets the side-set value-bit count (0..5). Reduces the per-instruction delay range.</summary>
+            <summary>
+            Gets or sets the side-set value-bit count (0..5). Reduces the per-instruction delay range.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.SideSetOptional">
-            <summary>Gets or sets a value indicating whether side-set is optional and an enable bit is reserved.</summary>
+            <summary>
+            Gets or sets a value indicating whether side-set is optional and an enable bit is reserved.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.SideSetPinDirs">
-            <summary>Gets or sets a value indicating whether side-set drives PINDIRS instead of PINS.</summary>
+            <summary>
+            Gets or sets a value indicating whether side-set drives PINDIRS instead of PINS.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.OutShiftDir">
-            <summary>Gets or sets the OUT/PULL shift direction.</summary>
+            <summary>
+            Gets or sets the OUT/PULL shift direction.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.AutoPull">
-            <summary>Gets or sets a value indicating whether the output shift register auto-pulls when empty.</summary>
+            <summary>
+            Gets or sets a value indicating whether the output shift register auto-pulls when empty.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.PullThreshold">
-            <summary>Gets or sets the auto-pull threshold in bits (1..32).</summary>
+            <summary>
+            Gets or sets the auto-pull threshold in bits (1..32).
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.InShiftDir">
-            <summary>Gets or sets the IN/PUSH shift direction.</summary>
+            <summary>
+            Gets or sets the IN/PUSH shift direction.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.AutoPush">
-            <summary>Gets or sets a value indicating whether the input shift register auto-pushes when full.</summary>
+            <summary>
+            Gets or sets a value indicating whether the input shift register auto-pushes when full.
+            </summary>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioProgramOptions.PushThreshold">
-            <summary>Gets or sets the auto-push threshold in bits (1..32).</summary>
+            <summary>
+            Gets or sets the auto-push threshold in bits (1..32).
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.ShiftDirection">
-            <summary>Shift direction for the ISR/OSR (and autopush/autopull defaults).</summary>
+            <summary>
+            Shift direction for the ISR/OSR (and autopush/autopull defaults).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.ShiftDirection.Left">
-            <summary>Shift towards the most-significant bit (left).</summary>
+            <summary>
+            Shift towards the most-significant bit (left).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.ShiftDirection.Right">
-            <summary>Shift towards the least-significant bit (right).</summary>
+            <summary>
+            Shift towards the least-significant bit (right).
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.SourceOperand">
-            <summary>Source operand. The legal subset depends on the instruction (validated at emit time).</summary>
+            <summary>
+            Source operand. The legal subset depends on the instruction (validated at emit time).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.Pins">
-            <summary>The pins mapped to the instruction's pin group.</summary>
+            <summary>
+            The pins mapped to the instruction's pin group.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.RegisterX">
-            <summary>The scratch register X.</summary>
+            <summary>
+            The scratch register X.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.RegisterY">
-            <summary>The scratch register Y.</summary>
+            <summary>
+            The scratch register Y.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.Null">
-            <summary>All zeroes.</summary>
+            <summary>
+            All zeroes.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.Status">
-            <summary>The status value (all-ones or all-zeroes per the configured status source).</summary>
+            <summary>
+            The status value (all-ones or all-zeroes per the configured status source).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.InputShiftRegister">
-            <summary>The input shift register (ISR).</summary>
+            <summary>
+            The input shift register (ISR).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.SourceOperand.OutputShiftRegister">
-            <summary>The output shift register (OSR).</summary>
+            <summary>
+            The output shift register (OSR).
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioStateMachine">
             <summary>
@@ -661,13 +1142,17 @@
             </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.#ctor(nanoFramework.Hardware.Pico.Pio.PioBlock,System.Int32,System.Boolean)">
-            <summary>Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioStateMachine"/> class.</summary>
+            <summary>
+            Initializes a new instance of the <see cref="T:nanoFramework.Hardware.Pico.Pio.PioStateMachine"/> class.
+            </summary>
             <param name="block">The owning PIO block.</param>
             <param name="sm">The state-machine index (0..3).</param>
             <param name="owned"><see langword="true"/> when this wrapper claimed the SM and must release it on dispose.</param>
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Index">
-            <summary>State machine index (0..3).</summary>
+            <summary>
+            State machine index (0..3).
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Init(System.UInt32,nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig)">
             <summary>
@@ -688,32 +1173,60 @@
             </summary>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.IsTxFull">
+            <summary>
+            Gets a value indicating whether the TX FIFO cannot accept another word.
+            </summary>
+            <value><see langword="true"/> if the TX FIFO is full; otherwise, <see langword="false"/>.</value>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.IsRxEmpty">
+            <summary>
+            Gets a value indicating whether the RX FIFO has no words to read.
+            </summary>
+            <value><see langword="true"/> if the RX FIFO is empty; otherwise, <see langword="false"/>.</value>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.TxLevel">
+            <summary>
+            Reads the number of words currently queued in the TX FIFO (depth depends on FIFO join).
+            </summary>
+            <value>The number of words in the TX FIFO.</value>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.RxLevel">
+            <summary>
+            Reads the number of words currently queued in the RX FIFO (depth depends on FIFO join).
+            </summary>
+            <value>The number of words in the RX FIFO.</value>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.ProgramCounter">
+            <summary>
+            Reads the state machine's current program counter (instruction-memory offset 0..31).
+            </summary>
+            <value>The current program counter.</value>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.ClockDivisor">
+            <summary>
+            Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.
+            </summary>
+            <exception cref="T:System.ArgumentException"><paramref name="value"/> is outside the 1.0 .. 65536.0 range.</exception>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+        </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Put(System.UInt32)">
-            <summary>Pushes a word into the TX FIFO, yielding to other threads until there is room.</summary>
+            <summary>
+            Pushes a word into the TX FIFO, yielding to other threads until there is room.
+            </summary>
+            <param name="value">The word to push into the TX FIFO.</param>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Get">
-            <summary>Pops a word from the RX FIFO, yielding to other threads until one is available.</summary>
-            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.IsTxFull">
-            <summary><see langword="true"/> when the TX FIFO cannot accept another word; otherwise, <see langword="false"/>.</summary>
-            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.IsRxEmpty">
-            <summary><see langword="true"/> when the RX FIFO has no words to read; otherwise, <see langword="false"/>.</summary>
-            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.GetTxLevel">
-            <summary>Reads the number of words currently queued in the TX FIFO (depth depends on FIFO join).</summary>
-            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.GetRxLevel">
-            <summary>Reads the number of words currently queued in the RX FIFO (depth depends on FIFO join).</summary>
-            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.GetProgramCounter">
-            <summary>Reads the state machine's current program counter (instruction-memory offset 0..31).</summary>
+            <summary>
+            Pops a word from the RX FIFO, yielding to other threads until one is available.
+            </summary>
+            <returns>The word popped from the RX FIFO.</returns>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.TryPut(System.UInt32)">
@@ -723,6 +1236,8 @@
             CLR thread the way <see cref="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Put(System.UInt32)"/> does. Safe against the FIFO state changing under it: the
             check and the write are a single uninterrupted managed step on the cooperative CLR.
             </summary>
+            <param name="value">The word to push into the TX FIFO.</param>
+            <returns><see langword="true"/> if the word was pushed; <see langword="false"/> if the FIFO was full.</returns>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.TryGet(System.UInt32@)">
@@ -730,10 +1245,13 @@
             Attempts to pop a word from the RX FIFO without blocking. Returns <c>false</c> (and sets
             <paramref name="value"/> to 0) when the FIFO is empty, instead of blocking like <see cref="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Get"/>.
             </summary>
+            <param name="value">The word popped from the RX FIFO.</param>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.ClearFifos">
-            <summary>Clears this state machine's TX and RX FIFOs (maps to <c>pio_sm_clear_fifos</c>).</summary>
+            <summary>
+            Clears this state machine's TX and RX FIFOs (maps to <c>pio_sm_clear_fifos</c>).
+            </summary>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.DrainTxFifo">
@@ -755,12 +1273,6 @@
             Restarts this state machine's clock divider so its phase realigns with other SMs started at
             the same time (maps to <c>pio_sm_clkdiv_restart</c>).
             </summary>
-            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.SetClockDivisor(System.Single)">
-            <summary>Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.</summary>
-            <param name="div">The clock divider, 1.0 to 65536.0.</param>
-            <exception cref="T:System.ArgumentException"><paramref name="div"/> is outside the 1.0 .. 65536.0 range.</exception>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Exec(System.UInt16)">
@@ -788,7 +1300,9 @@
             <inheritdoc/>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Finalize">
-            <summary>Releases the SM claim if the instance is collected without an explicit Dispose.</summary>
+            <summary>
+            Releases the SM claim if the instance is collected without an explicit Dispose.
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Read(System.UInt32[],System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -806,6 +1320,22 @@
             <exception cref="T:System.ArgumentOutOfRangeException">The range falls outside <paramref name="buffer"/>, or an argument is negative.</exception>
             <exception cref="T:System.InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
         </member>
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Write(System.UInt32[],System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Writes <paramref name="count"/> words from <paramref name="buffer"/> into the TX FIFO using a
+            DMA channel paced by this state machine's TX request. Blocks the calling thread but yields the
+            CLR while the transfer runs, so other threads keep running (no busy-wait, no FIFO stall).
+            </summary>
+            <param name="buffer">Source array.</param>
+            <param name="offset">Index in <paramref name="buffer"/> at which to start reading.</param>
+            <param name="count">Number of 32-bit words to write.</param>
+            <param name="timeoutMs">Maximum time to wait, in milliseconds.</param>
+            <returns>The number of words actually transferred (less than <paramref name="count"/> on timeout).</returns>
+            <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="buffer"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The range falls outside <paramref name="buffer"/>, or an argument is negative.</exception>
+            <exception cref="T:System.InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
+        </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig">
             <summary>
             Fluent configuration for a PIO state machine. Seed it from an assembled program
@@ -814,91 +1344,149 @@
             </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.BlobLength">
-            <summary>Number of entries in the flattened configuration blob.</summary>
+            <summary>
+            Number of entries in the flattened configuration blob.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxOutBase">
-            <summary>Blob index of the OUT pin base.</summary>
+            <summary>
+            Blob index of the OUT pin base.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxOutCount">
-            <summary>Blob index of the OUT pin count.</summary>
+            <summary>
+            Blob index of the OUT pin count.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxSetBase">
-            <summary>Blob index of the SET pin base.</summary>
+            <summary>
+            Blob index of the SET pin base.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxSetCount">
-            <summary>Blob index of the SET pin count.</summary>
+            <summary>
+            Blob index of the SET pin count.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxSideSetBase">
-            <summary>Blob index of the side-set pin base.</summary>
+            <summary>
+            Blob index of the side-set pin base.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxSideSetCount">
-            <summary>Blob index of the side-set value-bit count.</summary>
+            <summary>
+            Blob index of the side-set value-bit count.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxSideSetOpt">
-            <summary>Blob index of the side-set optional flag.</summary>
+            <summary>
+            Blob index of the side-set optional flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxSideSetPinDirs">
-            <summary>Blob index of the side-set PINDIRS flag.</summary>
+            <summary>
+            Blob index of the side-set PINDIRS flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxInBase">
-            <summary>Blob index of the IN pin base.</summary>
+            <summary>
+            Blob index of the IN pin base.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxJmpPin">
-            <summary>Blob index of the JMP PIN GPIO.</summary>
+            <summary>
+            Blob index of the JMP PIN GPIO.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxOutShiftRight">
-            <summary>Blob index of the OUT/pull shift-right flag.</summary>
+            <summary>
+            Blob index of the OUT/pull shift-right flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxAutoPull">
-            <summary>Blob index of the autopull flag.</summary>
+            <summary>
+            Blob index of the autopull flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxPullThreshold">
-            <summary>Blob index of the autopull threshold.</summary>
+            <summary>
+            Blob index of the autopull threshold.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxInShiftRight">
-            <summary>Blob index of the IN/push shift-right flag.</summary>
+            <summary>
+            Blob index of the IN/push shift-right flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxAutoPush">
-            <summary>Blob index of the autopush flag.</summary>
+            <summary>
+            Blob index of the autopush flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxPushThreshold">
-            <summary>Blob index of the autopush threshold.</summary>
+            <summary>
+            Blob index of the autopush threshold.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxWrapTarget">
-            <summary>Blob index of the wrap-target offset.</summary>
+            <summary>
+            Blob index of the wrap-target offset.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxWrap">
-            <summary>Blob index of the wrap offset.</summary>
+            <summary>
+            Blob index of the wrap offset.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxClkDivInt">
-            <summary>Blob index of the clock-divider integer part.</summary>
+            <summary>
+            Blob index of the clock-divider integer part.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxClkDivFrac">
-            <summary>Blob index of the clock-divider fractional part.</summary>
+            <summary>
+            Blob index of the clock-divider fractional part.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxFifoJoin">
-            <summary>Blob index of the FIFO join mode.</summary>
+            <summary>
+            Blob index of the FIFO join mode.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxGpioBase">
-            <summary>Blob index of the GPIO base.</summary>
+            <summary>
+            Blob index of the GPIO base.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxMovStatusSel">
-            <summary>Blob index of the MOV status source selector.</summary>
+            <summary>
+            Blob index of the MOV status source selector.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxMovStatusN">
-            <summary>Blob index of the MOV status N threshold.</summary>
+            <summary>
+            Blob index of the MOV status N threshold.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxOutSticky">
-            <summary>Blob index of the OUT sticky flag.</summary>
+            <summary>
+            Blob index of the OUT sticky flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxInlineOutEn">
-            <summary>Blob index of the inline-OUT-enable flag.</summary>
+            <summary>
+            Blob index of the inline-OUT-enable flag.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.IdxOutEnSel">
-            <summary>Blob index of the inline OUT enable bit selector.</summary>
+            <summary>
+            Blob index of the inline OUT enable bit selector.
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.#ctor">
-            <summary>Creates an empty configuration (clkdiv = 1.0, no pins mapped).</summary>
+            <summary>
+            Creates an empty configuration (clkdiv = 1.0, no pins mapped).
+            </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.FromProgram(nanoFramework.Hardware.Pico.Pio.PioProgram,System.Int32)">
             <summary>
@@ -906,30 +1494,50 @@
             <paramref name="offset"/>: wrap/side-set/shift defaults are taken from the
             program (matching the SDK's <c>*_program_get_default_config</c>).
             </summary>
+            <param name="program">The assembled program.</param>
+            <param name="offset">The absolute instruction-memory offset where the program will be loaded (0..31).</param>
             <exception cref="T:System.ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentException">Offset must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.OutPins(System.Int32,System.Int32)">
-            <summary>Maps the OUT pin group (base GPIO and consecutive pin count).</summary>
+            <summary>
+            Maps the OUT pin group (base GPIO and consecutive pin count).
+            </summary>
+            <param name="basePin">The base GPIO pin.</param>
+            <param name="count">The number of consecutive pins.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.SetPins(System.Int32,System.Int32)">
-            <summary>Maps the SET pin group (base GPIO and consecutive pin count, 0..5).</summary>
+            <summary>
+            Maps the SET pin group (base GPIO and consecutive pin count, 0..5).
+            </summary>
+            <param name="basePin">The base GPIO pin.</param>
+            <param name="count">The number of consecutive pins.</param>
             <exception cref="T:System.ArgumentException">SET pin count must be 0..5.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.SideSetPins(System.Int32)">
-            <summary>Maps the side-set pin base. The count comes from the program/assembler.</summary>
+            <summary>
+            Maps the side-set pin base. The count comes from the program/assembler.
+            </summary>
+            <param name="basePin">The base GPIO pin.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.InPins(System.Int32)">
-            <summary>Maps the IN pin base.</summary>
+            <summary>
+            Maps the IN pin base.
+            </summary>
+            <param name="basePin">The base GPIO pin.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.JmpPin(System.Int32)">
-            <summary>Selects the GPIO used by the JMP PIN condition.</summary>
+            <summary>
+            Selects the GPIO used by the JMP PIN condition.
+            </summary>
+            <param name="pin">The GPIO pin.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.ClockDivisor(System.Single)">
             <summary>
             Sets the clock divider (1.0 .. 65536.0). The SM advances at sysclk/div.
             Stored as the integer and 1/256 fractional parts of the CLKDIV register.
             </summary>
+            <param name="div">The clock divider, 1.0 to 65536.0.</param>
             <exception cref="T:System.ArgumentException">Clock divisor must be 1.0..65536.0.</exception>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.DefaultSystemClockHz">
@@ -955,6 +1563,7 @@
             Sets the FIFO join mode. The PUT/GET modes (RP2350/PIO v1) make the RX FIFO a
             random-access register file for the indexed RX-FIFO MOV instructions.
             </summary>
+            <param name="mode">The FIFO join mode.</param>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.GpioBase(System.Int32)">
             <summary>
@@ -962,10 +1571,13 @@
             — so a state machine can reach the upper GPIOs on 48-pin packages (RP2350B). Pin mappings
             stay <em>absolute</em> GPIO numbers; the base is subtracted to form the 5-bit pin fields.
             </summary>
+            <param name="gpioBase">The GPIO base.</param>
             <exception cref="T:System.ArgumentException">GPIO base must be 0 or 16.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.Wrap(System.Int32,System.Int32)">
-            <summary>Overrides the wrap region (absolute program offsets). Normally seeded by FromProgram.</summary>
+            <summary>
+            Overrides the wrap region (absolute program offsets). Normally seeded by FromProgram.
+            </summary>
             <param name="wrapTarget">The PC to wrap back to (0..31).</param>
             <param name="wrap">The last PC before wrapping (0..31), at or after <paramref name="wrapTarget"/>.</param>
             <returns>This configuration, for chaining.</returns>
@@ -976,6 +1588,9 @@
             Source for the <c>mov ..., status</c> instruction: all-ones when the selected FIFO's level is
             less than <paramref name="n"/>, else all-zeroes (EXECCTRL STATUS_SEL/STATUS_N).
             </summary>
+            <param name="sel">The FIFO to monitor.</param>
+            <param name="n">The threshold (0..15).</param>
+            <returns>This configuration, for chaining.</returns>
             <exception cref="T:System.ArgumentException">Status N must be 0..15.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.OutSpecial(System.Boolean,System.Boolean,System.Int32)">
@@ -984,31 +1599,52 @@
             cycle; <paramref name="enableInlineOut"/> uses OUT bit <paramref name="enableBitIndex"/> as a
             per-cycle output enable (EXECCTRL OUT_STICKY / INLINE_OUT_EN / OUT_EN_SEL).
             </summary>
+            <param name="sticky">Indicates whether to keep the last OUT/SET value driven each cycle.</param>
+            <param name="enableInlineOut">Indicates whether to use the inline output enable.</param>
+            <param name="enableBitIndex">The index of the bit used for output enable (0..31).</param>
+            <returns>This configuration, for chaining.</returns>
             <exception cref="T:System.ArgumentException">Enable bit index must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.ToBlob">
-            <summary>Flattens the configuration into the fixed-layout blob handed to native interop.</summary>
+            <summary>
+            Flattens the configuration into the fixed-layout blob handed to native interop.
+            </summary>
+            <returns>The configuration blob.</returns>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioVersion">
-            <summary>PIO hardware version. Determines which instructions/features are legal.</summary>
+            <summary>
+            PIO hardware version. Determines which instructions/features are legal.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioVersion.Rp2040">
-            <summary>RP2040 (PIO v0).</summary>
+            <summary>
+            RP2040 (PIO v0).
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioVersion.Rp2350">
-            <summary>RP2350 (PIO v1): adds extended MOV, FIFO PUTGET, GPIO base window.</summary>
+            <summary>
+            RP2350 (PIO v1): adds extended MOV, FIFO PUTGET, GPIO base window.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioWaitSource">
-            <summary>Wait polarity source.</summary>
+            <summary>
+            Wait polarity source.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioWaitSource.Gpio">
-            <summary>Absolute GPIO index.</summary>
+            <summary>
+            Absolute GPIO index.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioWaitSource.Pin">
-            <summary>Pin relative to the state machine's IN base.</summary>
+            <summary>
+            Pin relative to the state machine's IN base.
+            </summary>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioWaitSource.Irq">
-            <summary>IRQ flag.</summary>
+            <summary>
+            IRQ flag.
+            </summary>
         </member>
     </members>
 </doc>
