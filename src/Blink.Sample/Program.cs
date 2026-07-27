@@ -31,7 +31,7 @@ namespace BlinkSample
 
             PioProgram program = BuildPioProgram();
 
-            PioBlock pio = Pio.Get(0);
+            PioBlock pio = Pio.Get(Pio.MinIndex);
             uint offset = pio.AddProgram(program);
 
             _sm = pio.ClaimStateMachine();

@@ -24,6 +24,7 @@ namespace CoverageSample
         public const uint ClockSentinel = 0xC0DE;     // echoes after ClockDivisor/ClockDivRestart
         public const uint ReuseSentinel = 0xABCDABCD; // echoes after RemoveProgram + re-add
         public const uint DmaSentinelBase = 0xDA000000; // first word of the DMA round-trip batch
+        public const uint BlockingSentinel = 0xB10CB10C; // round-tripped with the blocking Put/Get pair
 
         private const int DmaBatch = 4;           // fits the FIFO, so a healthy round trip never stalls
         private const int DmaOverflow = 16;       // deeper than any FIFO, so the write has to stall
@@ -31,6 +32,7 @@ namespace CoverageSample
         private const int DmaShortTimeoutMs = 5;
         private const int DmaLeakRounds = 20;     // more rounds than the RP2040 has DMA channels
         private const int DisposeDelayMs = 200;
+        private const int TickIntervalMs = 10;
         private const int DisposeReadTimeoutMs = 5000;
 
         public static int RemoveReuseOffset = -1; // second AddProgram offset after RemoveProgram (expect 0)
@@ -52,6 +54,19 @@ namespace CoverageSample
         public static int DmaReadStalled = -1;    // Read from an empty RX FIFO (expect 0)
         public static int DmaSurvivesTimeouts;    // 1 if repeated timeouts leave the channel pool intact
         public static int DisposeInFlightOk;      // 1 if disposing mid-transfer unwound without hanging
+
+        // Firmware-reported topology, so a sample never has to hardcode a block index or a pin ceiling.
+        public static int MinIndexSeen = -1;
+        public static int BlockCountSeen = -1;
+        public static int MaxPinSeen = -1;
+        public static int TopologyOk;             // 1 if the three constants are coherent with each other
+        public static int SmIndexEnumOk;          // 1 if StateMachine(enum) round-trips through Index
+
+        // Blocking Put/Get. These park the calling thread on the FIFO interrupt in native code; the
+        // point of the checks below is that parking is not the same as freezing the interpreter.
+        public static int BlockingRoundTripOk;    // 1 if Put/Get moved a word through the loopback
+        public static int BlockingPutTimedOut;    // 1 if Put on a stalled SM gave up instead of hanging
+        public static int TicksWhileParked = -1;  // background thread progress during that parked Put
 
         public static int Done;                   // set last, so the test knows recording finished
 
@@ -104,7 +119,7 @@ namespace CoverageSample
         {
             PioProgram program = BuildLoopback();
 
-            PioBlock pio = Pio.Get(0);
+            PioBlock pio = Pio.Get(Pio.MinIndex);
             uint offset0 = pio.AddProgram(program);
             PioStateMachine sm = pio.ClaimStateMachine();
             sm.Init(offset0, PioStateMachineConfig.FromProgram(program, (int)offset0)
@@ -284,7 +299,7 @@ namespace CoverageSample
 
             // --- Unclaim proof (bookkeeping, not FIFO) ---
             // Fill a fresh block; the 5th claim fails, dispose one, the next succeeds.
-            PioBlock pioB = Pio.Get(1);
+            PioBlock pioB = Pio.Get(Pio.MinIndex + 1);
             PioStateMachine[] claimed = new PioStateMachine[4];
             for (int i = 0; i < 4; i++)
             {
@@ -378,6 +393,61 @@ namespace CoverageSample
                  fe.SideSetPinDirs && fe.OutShiftDir == ShiftDirection.Left && fe.AutoPull && fe.PullThreshold == 8 &&
                  fe.InShiftDir == ShiftDirection.Left && fe.AutoPush && fe.PushThreshold == 16 &&
                  !feDefault.AutoPull && feDefault.PullThreshold == 32 && feDefault.SideSetCount == 0) ? 1 : 0;
+
+            // --- Firmware-reported topology ---
+            MinIndexSeen = Pio.MinIndex;
+            BlockCountSeen = Pio.BlockCount;
+            MaxPinSeen = Pio.MaxPin;
+            TopologyOk = (MinIndexSeen >= 0 && MinIndexSeen < BlockCountSeen && MaxPinSeen > 0) ? 1 : 0;
+
+            // Claiming a named index only means something once that index is known to be free, so the
+            // harness releases one it already holds and asks for exactly that one back.
+            PioStateMachineIndex freed = sm2.Index;
+            sm2.Dispose();
+            PioStateMachine smByIndex = pio.ClaimStateMachine(freed);
+            SmIndexEnumOk = smByIndex.Index == freed ? 1 : 0;
+
+            // --- Blocking Put/Get through the loopback ---
+            sm.ClearFifos();
+            sm.Enabled = true;
+            sm.Put(BlockingSentinel);
+            BlockingRoundTripOk = sm.Get() == BlockingSentinel ? 1 : 0;
+
+            // --- Blocking Put against a state machine that consumes nothing ---
+            // The FIFO fills, the call parks on the TX interrupt and eventually gives up. A background
+            // thread counts ticks throughout: if the native wait spun instead of parking, the CLR would
+            // be frozen for the whole budget and this counter would barely move.
+            sm.Enabled = false;
+            sm.ClearFifos();
+
+            int ticks = 0;
+            bool ticking = true;
+            var ticker = new Thread(() =>
+            {
+                while (ticking)
+                {
+                    ticks++;
+                    Thread.Sleep(TickIntervalMs);
+                }
+            });
+            ticker.Start();
+
+            try
+            {
+                for (int i = 0; i < 16; i++)
+                {
+                    sm.Put(0xF10F0000 + (uint)i);
+                }
+            }
+            catch
+            {
+                BlockingPutTimedOut = 1;
+            }
+
+            ticking = false;
+            TicksWhileParked = ticks;
+
+            sm.ClearFifos();
 
             Done = 1;
 

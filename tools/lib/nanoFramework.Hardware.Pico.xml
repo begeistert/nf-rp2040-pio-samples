@@ -11,13 +11,36 @@
             state machine.
             </summary>
         </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.Pio.MinIndex">
+            <summary>
+            Gets the first PIO block index this device makes available to application code.
+            </summary>
+            <remarks>
+            On a board with wireless the firmware reserves PIO0 for the radio, so the first usable
+            block is not the same everywhere. Starting from this property instead of a literal index
+            keeps the same code working on both.
+            </remarks>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.Pio.BlockCount">
+            <summary>
+            Gets the number of PIO blocks on this device, whether or not application code may use
+            them. Valid indices for <see cref="M:nanoFramework.Hardware.Pico.Pio.Pio.Get(System.Int32)"/> run from <see cref="P:nanoFramework.Hardware.Pico.Pio.Pio.MinIndex"/> up to, but not
+            including, this value.
+            </summary>
+        </member>
+        <member name="P:nanoFramework.Hardware.Pico.Pio.Pio.MaxPin">
+            <summary>
+            Gets the highest GPIO a PIO block on this device can drive: 29 on the RP2040, 47 on the
+            RP2350.
+            </summary>
+        </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.Pio.Get(System.Int32)">
             <summary>
             Gets the PIO block at the specified index.
             </summary>
-            <param name="index">The PIO block index (0 or 1; 2 is RP2350-only).</param>
+            <param name="index">The PIO block index, from <see cref="P:nanoFramework.Hardware.Pico.Pio.Pio.MinIndex"/> up to but not including <see cref="P:nanoFramework.Hardware.Pico.Pio.Pio.BlockCount"/>.</param>
             <returns>The <see cref="T:nanoFramework.Hardware.Pico.Pio.PioBlock"/> instance for the specified index.</returns>
-            <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is less than 0 or exceeds the number of available PIO blocks.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is not a block this device makes available, which includes a block the firmware reserves for itself, as PIO0 is on a wireless board.</exception>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioAssembler">
             <summary>
@@ -333,22 +356,17 @@
             <exception cref="T:System.ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="offset"/> plus the program length exceeds the 32-word instruction memory.</exception>
         </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine">
+        <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine(nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex)">
             <summary>
-            Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).
+            Claims a state machine on this block and returns it. With no argument it takes whichever one
+            is free (<c>pio_claim_unused_sm</c>); with an explicit index it takes exactly that one
+            (<c>pio_sm_claim</c>) and fails if somebody else already holds it. Disposing the returned
+            instance releases the claim.
             </summary>
+            <param name="stateMachine">The state machine to claim, or <see cref="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex.Any"/> for the first free one.</param>
             <returns>The newly claimed state machine.</returns>
-            <exception cref="T:System.InvalidOperationException">All four state machines on the block are already claimed.</exception>
-        </member>
-        <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.StateMachine(System.Int32)">
-            <summary>
-            Gets a specific state machine (0..3) on this block. Unlike <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine"/>
-            this does <em>not</em> mark the state machine as claimed, so the caller is responsible for avoiding
-            collisions; prefer <see cref="M:nanoFramework.Hardware.Pico.Pio.PioBlock.ClaimStateMachine"/> unless a fixed state machine index is required.
-            </summary>
-            <param name="stateMachine">The state machine index (0..3).</param>
-            <returns>The state machine instance.</returns>
-            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="stateMachine"/> is less than 0 or greater than 3.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="stateMachine"/> is not one of the defined values.</exception>
+            <exception cref="T:System.InvalidOperationException">The requested state machine is already claimed, or none is free.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.InitGpio(System.Int32)">
             <summary>
@@ -357,7 +375,7 @@
             pin mapped via OUT/SET/side-set/IN actually reaches the physical pad.
             </summary>
             <param name="pin">The GPIO to route.</param>
-            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than 47.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than <see cref="P:nanoFramework.Hardware.Pico.Pio.Pio.MaxPin"/>.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioBlock.InitGpioRange(System.Int32,System.Int32)">
             <summary>
@@ -1151,7 +1169,7 @@
         </member>
         <member name="P:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Index">
             <summary>
-            State machine index (0..3).
+            The state machine this instance drives.
             </summary>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Init(System.UInt32,nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig)">
@@ -1217,24 +1235,26 @@
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Put(System.UInt32)">
             <summary>
-            Pushes a word into the TX FIFO, yielding to other threads until there is room.
+            Pushes a word into the TX FIFO, waiting for room if the FIFO is full.
             </summary>
             <param name="value">The word to push into the TX FIFO.</param>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+            <exception cref="T:System.TimeoutException">The TX FIFO stayed full for the whole wait budget, which means the state machine is not consuming words.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Get">
             <summary>
-            Pops a word from the RX FIFO, yielding to other threads until one is available.
+            Pops a word from the RX FIFO, waiting for one if the FIFO is empty.
             </summary>
             <returns>The word popped from the RX FIFO.</returns>
             <exception cref="T:System.ObjectDisposedException">The state machine has been disposed.</exception>
+            <exception cref="T:System.TimeoutException">The RX FIFO stayed empty for the whole wait budget, which means the state machine is not producing words.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.TryPut(System.UInt32)">
             <summary>
             Attempts to push a word into the TX FIFO without blocking. Returns <c>false</c> (and writes
             nothing) when the FIFO is full, so callers can poll or do other work instead of stalling the
-            CLR thread the way <see cref="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Put(System.UInt32)"/> does. Safe against the FIFO state changing under it: the
-            check and the write are a single uninterrupted managed step on the cooperative CLR.
+            CLR thread the way <see cref="M:nanoFramework.Hardware.Pico.Pio.PioStateMachine.Put(System.UInt32)"/> does. The check and the write happen as one native step, so
+            the FIFO state cannot change in between.
             </summary>
             <param name="value">The word to push into the TX FIFO.</param>
             <returns><see langword="true"/> if the word was pushed; <see langword="false"/> if the FIFO was full.</returns>
@@ -1497,7 +1517,7 @@
             <param name="program">The assembled program.</param>
             <param name="offset">The absolute instruction-memory offset where the program will be loaded (0..31).</param>
             <exception cref="T:System.ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
-            <exception cref="T:System.ArgumentException">Offset must be 0..31.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Offset must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.OutPins(System.Int32,System.Int32)">
             <summary>
@@ -1512,7 +1532,7 @@
             </summary>
             <param name="basePin">The base GPIO pin.</param>
             <param name="count">The number of consecutive pins.</param>
-            <exception cref="T:System.ArgumentException">SET pin count must be 0..5.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">SET pin count must be 0..5.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.SideSetPins(System.Int32)">
             <summary>
@@ -1538,7 +1558,7 @@
             Stored as the integer and 1/256 fractional parts of the CLKDIV register.
             </summary>
             <param name="div">The clock divider, 1.0 to 65536.0.</param>
-            <exception cref="T:System.ArgumentException">Clock divisor must be 1.0..65536.0.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Clock divisor must be 1.0..65536.0.</exception>
         </member>
         <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.DefaultSystemClockHz">
             <summary>
@@ -1555,8 +1575,8 @@
             </summary>
             <param name="frequencyHz">Desired SM tick frequency in Hz (must be positive).</param>
             <param name="sysClockHz">System clock in Hz (defaults to <see cref="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.DefaultSystemClockHz"/>).</param>
-            <exception cref="T:System.ArgumentException">Frequency must be positive.</exception>
-            <exception cref="T:System.ArgumentException">System clock must be positive.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Frequency must be positive.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">System clock must be positive.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.FifoJoin(nanoFramework.Hardware.Pico.Pio.PioFifoJoin)">
             <summary>
@@ -1591,7 +1611,7 @@
             <param name="sel">The FIFO to monitor.</param>
             <param name="n">The threshold (0..15).</param>
             <returns>This configuration, for chaining.</returns>
-            <exception cref="T:System.ArgumentException">Status N must be 0..15.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Status N must be 0..15.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.OutSpecial(System.Boolean,System.Boolean,System.Int32)">
             <summary>
@@ -1603,13 +1623,45 @@
             <param name="enableInlineOut">Indicates whether to use the inline output enable.</param>
             <param name="enableBitIndex">The index of the bit used for output enable (0..31).</param>
             <returns>This configuration, for chaining.</returns>
-            <exception cref="T:System.ArgumentException">Enable bit index must be 0..31.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Enable bit index must be 0..31.</exception>
         </member>
         <member name="M:nanoFramework.Hardware.Pico.Pio.PioStateMachineConfig.ToBlob">
             <summary>
             Flattens the configuration into the fixed-layout blob handed to native interop.
             </summary>
             <returns>The configuration blob.</returns>
+        </member>
+        <member name="T:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex">
+            <summary>
+            Identifies one of the four state machines a PIO block owns. Every RP2040 and RP2350
+            variant has exactly four per block, so unlike the block index this set never changes
+            with the device.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex.Sm0">
+            <summary>
+            State machine 0.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex.Sm1">
+            <summary>
+            State machine 1.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex.Sm2">
+            <summary>
+            State machine 2.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex.Sm3">
+            <summary>
+            State machine 3.
+            </summary>
+        </member>
+        <member name="F:nanoFramework.Hardware.Pico.Pio.PioStateMachineIndex.Any">
+            <summary>
+            Whichever state machine is free. Valid only when asking for one; never returned as an identity.
+            </summary>
         </member>
         <member name="T:nanoFramework.Hardware.Pico.Pio.PioVersion">
             <summary>

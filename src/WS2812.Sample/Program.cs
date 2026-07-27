@@ -23,7 +23,7 @@ namespace Ws2812Sample
         {
             PioProgram program = BuildWs2812();
 
-            PioBlock pio = Pio.Get(0);
+            PioBlock pio = Pio.Get(Pio.MinIndex);
 
             // Load the program ONCE; both state machines run it from the same instruction memory.
             uint offset = pio.AddProgram(program);

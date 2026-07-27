@@ -40,7 +40,7 @@ namespace FadeSample
             asm.Jmp(PioCondition.YPostDec, loop);
             PioProgram program = asm.Build();
 
-            PioBlock pio = Pio.Get(0);
+            PioBlock pio = Pio.Get(Pio.MinIndex);
             uint offset = pio.AddProgram(program);
             PioStateMachine sm = pio.ClaimStateMachine();
             sm.Init(offset, PioStateMachineConfig.FromProgram(program, (int)offset)

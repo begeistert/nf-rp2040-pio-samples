@@ -42,7 +42,7 @@ namespace IrqSample
             asm.Wrap();
             PioProgram program = asm.Build();
 
-            PioBlock pio = Pio.Get(0);
+            PioBlock pio = Pio.Get(Pio.MinIndex);
             uint offset = pio.AddProgram(program);
 
             // Subscribe before starting anything: subscribing arms the IRQ0 -> NVIC routing, and the

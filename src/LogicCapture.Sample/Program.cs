@@ -54,7 +54,7 @@ namespace LogicCaptureSample
             _samplesPerWord = WordBits / pinCount;
             _program = BuildProgram(pinCount);
 
-            _pio = Pio.Get(0);
+            _pio = Pio.Get(Pio.MinIndex);
             _offset = _pio.AddProgram(_program);
 
             for (int i = 0; i < pinCount; i++)

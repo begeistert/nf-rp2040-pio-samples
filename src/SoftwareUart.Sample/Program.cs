@@ -51,7 +51,7 @@ namespace SoftwareUartSample
 
             _program = BuildProgram();
 
-            _pio = Pio.Get(0);
+            _pio = Pio.Get(Pio.MinIndex);
             _offset = _pio.AddProgram(_program);
             _pio.InitGpio(txPin);
 
