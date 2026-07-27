@@ -53,13 +53,13 @@ namespace EchoSample
                 // instead of stalling the CLR thread.
                 if (sm.TryPut(n))
                 {
-                    uint level = sm.GetTxLevel();
+                    uint level = sm.TxLevel;
                     if (level > MaxTxLevel)
                     {
                         MaxTxLevel = level;
                     }
 
-                    LastPc = sm.GetProgramCounter();
+                    LastPc = sm.ProgramCounter;
 
                     // Non-blocking pop, bounded so a stalled SM can never hang the app.
                     int guard = 0;

@@ -1,7 +1,7 @@
 //
 // Sample — coverage harness for the PIO native interop. Not a "pretty" demo: it drives the FIFO
 // loopback program and exercises the native methods the other showcases never reach (RemoveProgram,
-// Exec, Restart, ClockDivRestart, DrainTxFifo, Unclaim via Dispose, GetRxLevel, SetClockDivisor,
+// Exec, Restart, ClockDivRestart, DrainTxFifo, Unclaim via Dispose, RxLevel, ClockDivisor,
 // ClearIrq) plus the input-validation paths. Each method's effect is routed through the FIFO with a
 // distinct sentinel so the integration test can OBSERVE it through the PioProbe (TxOf/RxOf), not just
 // read back a recorded value. A few methods have no FIFO-observable effect and are honest smoke checks
@@ -21,18 +21,38 @@ namespace CoverageSample
         public const uint DrainKept = 0xDDDD0003;     // echoes after DrainTxFifo
         public const uint DrainDropped1 = 0xDDDD0001; // pushed to TX then drained -> must NOT echo
         public const uint DrainDropped2 = 0xDDDD0002;
-        public const uint ClockSentinel = 0xC0DE;     // echoes after SetClockDivisor/ClockDivRestart
+        public const uint ClockSentinel = 0xC0DE;     // echoes after ClockDivisor/ClockDivRestart
         public const uint ReuseSentinel = 0xABCDABCD; // echoes after RemoveProgram + re-add
+        public const uint DmaSentinelBase = 0xDA000000; // first word of the DMA round-trip batch
+
+        private const int DmaBatch = 4;           // fits the FIFO, so a healthy round trip never stalls
+        private const int DmaOverflow = 16;       // deeper than any FIFO, so the write has to stall
+        private const int DmaTimeoutMs = 100;
+        private const int DmaShortTimeoutMs = 5;
+        private const int DmaLeakRounds = 20;     // more rounds than the RP2040 has DMA channels
+        private const int DisposeDelayMs = 200;
+        private const int DisposeReadTimeoutMs = 5000;
 
         public static int RemoveReuseOffset = -1; // second AddProgram offset after RemoveProgram (expect 0)
         public static int UnclaimWorks;           // 1 if exhaust/dispose/re-claim proves Unclaim frees a slot
-        public static int RxLevelSeen = -1;       // GetRxLevel reading while words sit in RX (expect > 0)
+        public static int RxLevelSeen = -1;       // RxLevel reading while words sit in RX (expect > 0)
         public static int RemoveEchoOk;           // 1 if the re-added program echoed its sentinel
         public static int RemoveUnownedThrew;     // native: RemoveProgram of a range that was never allocated
         public static int InitBadOffsetThrew;     // native: Init with an offset outside 0..31
         public static int PinDirsBadThrew;        // managed backstop: SetConsecutivePinDirs basePin > 47
         public static int InitGpioBadThrew;       // managed backstop: InitGpio pin > 47
         public static int FromEncodedOptionsOk;   // 1 if FromEncoded(options) carried every metadata field
+
+        // DMA-backed Read/Write. The interesting numbers are the short transfers: a stalled state
+        // machine must report the words that actually moved, never the count that was asked for.
+        public static int DmaWritten = -1;        // Write of a full round-trip batch (expect batch size)
+        public static int DmaRead = -1;           // Read of that same batch (expect batch size)
+        public static int DmaRoundTripOk;         // 1 if every word came back unchanged and in order
+        public static int DmaWriteStalled = -1;   // Write into a state machine that consumes nothing
+        public static int DmaReadStalled = -1;    // Read from an empty RX FIFO (expect 0)
+        public static int DmaSurvivesTimeouts;    // 1 if repeated timeouts leave the channel pool intact
+        public static int DisposeInFlightOk;      // 1 if disposing mid-transfer unwound without hanging
+
         public static int Done;                   // set last, so the test knows recording finished
 
         // The smallest program that uses both FIFOs: TX -> OSR -> ISR -> RX. Round-tripped through the
@@ -110,7 +130,7 @@ namespace CoverageSample
             {
             }
 
-            // --- GetRxLevel (probe-observed cross-check) ---
+            // --- RxLevel (probe-observed cross-check) ---
             // Push three words without draining so they pile up in RX, read the native level, then drain
             // them (the probe pulls all three). RxLevelSeen > 0 means the native FLEVEL read saw the words
             // the probe then confirms crossed the FIFO.
@@ -118,11 +138,11 @@ namespace CoverageSample
             sm.TryPut(0x202);
             sm.TryPut(0x303);
             int spin = 0;
-            while (sm.GetRxLevel() < 3 && spin++ < 4000)
+            while (sm.RxLevel < 3 && spin++ < 4000)
             {
             }
 
-            RxLevelSeen = (int)sm.GetRxLevel();
+            RxLevelSeen = (int)sm.RxLevel;
             uint drainGot;
             int g1 = 0;
             while (sm.TryGet(out drainGot) && g1++ < 16)
@@ -136,17 +156,22 @@ namespace CoverageSample
             // --- DrainTxFifo (probe-observed) ---
             // Park two words in TX with the SM disabled (the probe sees the TX pushes), drain them, then
             // re-enable and echo a marker. The drained words must never appear in RX.
+            //
+            // The loopback program pulls explicitly, so autopull is off and the drain has to consume the
+            // FIFO with PULL rather than OUT NULL. Getting that wrong leaves both words in TX, and the
+            // re-enabled state machine echoes them ahead of the marker — which is what this catches.
             sm.Enabled = false;
             sm.TryPut(DrainDropped1);
+            sm.TryPut(DrainDropped2);
             sm.DrainTxFifo();
             sm.Enabled = true;
             Echo(sm, DrainKept);
 
-            // --- SetClockDivisor + ClockDivRestart (smoke: not FIFO-observable) ---
+            // --- ClockDivisor + ClockDivRestart (smoke: not FIFO-observable) ---
             // The probe timestamps the firmware's TryPut/TryGet, not the PIO clock, so a clock change can't
             // be proven through the FIFO here. We only prove the SM keeps working after re-clocking by
             // echoing a sentinel.
-            sm.SetClockDivisor(2f);
+            sm.ClockDivisor = 2f;
             sm.ClockDivRestart();
             Echo(sm, ClockSentinel);
 
@@ -154,6 +179,93 @@ namespace CoverageSample
             // No managed IRQ-flag read-back, so this only proves Force/Clear run without locking up.
             pio.ForceIrq(0);
             pio.ClearIrq(0);
+
+            // --- Read/Write round trip (probe-observed) ---
+            // Both directions at once: Write feeds the TX FIFO through a DMA channel paced by the TX
+            // request, the loopback program moves each word OSR -> ISR, and Read drains RX through a
+            // second channel paced by the RX request. Batch is FIFO-sized so the round trip completes
+            // without the state machine ever stalling.
+            sm.ClearFifos();
+            uint[] txBatch = new uint[DmaBatch];
+            uint[] rxBatch = new uint[DmaBatch];
+            for (int i = 0; i < DmaBatch; i++)
+            {
+                txBatch[i] = DmaSentinelBase + (uint)i;
+            }
+
+            DmaWritten = sm.Write(txBatch, 0, DmaBatch, DmaTimeoutMs);
+            DmaRead = sm.Read(rxBatch, 0, DmaBatch, DmaTimeoutMs);
+
+            bool roundTripOk = DmaWritten == DmaBatch && DmaRead == DmaBatch;
+            for (int i = 0; i < DmaBatch && roundTripOk; i++)
+            {
+                roundTripOk = rxBatch[i] == txBatch[i];
+            }
+
+            DmaRoundTripOk = roundTripOk ? 1 : 0;
+
+            // --- Short transfers (the timeout accounting) ---
+            // With the state machine stopped nothing drains TX and nothing fills RX, so both calls have
+            // to time out. What matters is the count they report: the write moves whatever fits in the
+            // FIFO and then stalls, the read moves nothing at all. A transfer that reports the full
+            // count here is reading the DMA counter after the abort has already zeroed it.
+            sm.Enabled = false;
+            sm.ClearFifos();
+
+            uint[] overflow = new uint[DmaOverflow];
+            DmaWriteStalled = sm.Write(overflow, 0, DmaOverflow, DmaTimeoutMs);
+
+            uint[] drain = new uint[DmaBatch];
+            DmaReadStalled = sm.Read(drain, 0, DmaBatch, DmaTimeoutMs);
+
+            // --- Channel pool after repeated timeouts ---
+            // Every timed-out transfer must hand its channel back. There are only 12 of them on the
+            // RP2040, so a leak turns into an outright failure well inside this loop instead of the
+            // steady stream of short reads a working release path produces.
+            bool poolIntact = true;
+            for (int i = 0; i < DmaLeakRounds && poolIntact; i++)
+            {
+                try
+                {
+                    poolIntact = sm.Read(drain, 0, DmaBatch, DmaShortTimeoutMs) == 0;
+                }
+                catch
+                {
+                    poolIntact = false;
+                }
+            }
+
+            DmaSurvivesTimeouts = poolIntact ? 1 : 0;
+            sm.ClearFifos();
+
+            // --- Dispose while a transfer is in flight ---
+            // The riskiest unwind in the binding: the DMA is writing into a bounce buffer that Dispose
+            // is about to release, so the release path has to abort the channel before it frees. A
+            // second state machine takes the hit so the harness can carry on afterwards, and the read
+            // is given far longer than the disposer waits, so the dispose genuinely lands mid-transfer.
+            PioStateMachine smInFlight = pio.ClaimStateMachine();
+            smInFlight.Init(offset0, PioStateMachineConfig.FromProgram(program, (int)offset0)
+                .ClockFromFrequency(1_000_000f));
+            smInFlight.ClearFifos();
+
+            var disposer = new Thread(() =>
+            {
+                Thread.Sleep(DisposeDelayMs);
+                smInFlight.Dispose();
+            });
+            disposer.Start();
+
+            try
+            {
+                smInFlight.Read(drain, 0, DmaBatch, DisposeReadTimeoutMs);
+            }
+            catch
+            {
+                // A disposed state machine is a legitimate outcome here; a hang or a corrupt heap is not.
+            }
+
+            disposer.Join();
+            DisposeInFlightOk = 1;
 
             // --- RemoveProgram (probe-observed) ---
             // Free the SM and the program slots, re-add (reuses offset 0), then RUN the reloaded program and

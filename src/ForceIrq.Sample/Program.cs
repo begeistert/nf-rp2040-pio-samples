@@ -1,17 +1,25 @@
 //
 // Sample — raising a PIO interrupt from the CPU side: the app calls ForceIrq and the managed
-// NativeEventDispatcher handler fires (the SM raises nothing here). Useful for CPU->SM signalling.
+// PioBlock.Interrupt handler fires (the state machine raises nothing here). Useful for CPU->SM
+// signalling.
+//
+// A state machine is claimed even though the program does nothing: the block's interrupt is
+// delivered through the callbacks of its claimed state machines, so with none claimed the flag is
+// raised in hardware but never reaches managed code.
 //
 
 using System.Threading;
 using nanoFramework.Hardware.Pico.Pio;
-using nanoFramework.Runtime.Events;
 
 namespace ForceIrqSample
 {
     public class Program
     {
+        private const int ForcedIrqFlag = 0;
+        private const int PeriodMs = 500;
+
         public static int IrqCount;
+        public static PioInterruptFlags LastFlags;
 
         public static void Main()
         {
@@ -22,16 +30,24 @@ namespace ForceIrqSample
             PioProgram program = asm.Build();
 
             PioBlock pio = Pio.Get(0);
-            pio.AddProgram(program);
+            uint offset = pio.AddProgram(program);
 
-            var irq = new NativeEventDispatcher("PioIrqDriver", 0UL);
-            irq.OnInterrupt += (flags, _, time) => { IrqCount++; };
-            irq.EnableInterrupt();
+            PioStateMachine sm = pio.ClaimStateMachine();
+            sm.Init(offset, PioStateMachineConfig.FromProgram(program, (int)offset)
+                .ClockFromFrequency(1_000_000f));
+
+            pio.Interrupt += (sender, flags) =>
+            {
+                LastFlags = flags;
+                IrqCount++;
+            };
+
+            sm.Enabled = true;
 
             while (true)
             {
-                pio.ForceIrq(0);
-                Thread.Sleep(500);
+                pio.ForceIrq(ForcedIrqFlag);
+                Thread.Sleep(PeriodMs);
             }
         }
     }
