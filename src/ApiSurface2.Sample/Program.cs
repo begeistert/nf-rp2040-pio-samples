@@ -121,7 +121,9 @@ namespace ApiSurface2Sample
                 sm.Put(0xAAAA5555);
 
                 bool ok = sm.Get() == 0x0000AAAA;
-                ok = ok && sm.Get() == 0x00005555;
+
+                sm.Put(0x12340000);
+                ok = ok && sm.Get() == 0x00001234;
 
                 return ok;
             }
@@ -331,6 +333,11 @@ namespace ApiSurface2Sample
 
         public static int ForcedEvents;
         public static PioInterruptFlags LastForcedFlags;
+        public static int T19EventsSeen = -1;
+        public static int T19FlagsSeen = -1;
+        public static int T25Elapsed = -1;
+        public static uint T25Value;
+        public static long ProducerPutTicks;
 
         private static bool T19ForceIrq()
         {
@@ -338,6 +345,8 @@ namespace ApiSurface2Sample
 
             ForcedEvents = 0;
             LastForcedFlags = 0;
+
+            PioStateMachine anchor = pio.ClaimStateMachine();
 
             PioInterruptEventHandler handler = (sender, flags) =>
             {
@@ -361,11 +370,15 @@ namespace ApiSurface2Sample
                 Thread.Sleep(100);
                 ok = ok && ForcedEvents == 1;
 
+                T19EventsSeen = ForcedEvents;
+                T19FlagsSeen = (int)LastForcedFlags;
+
                 return ok;
             }
             finally
             {
                 pio.Interrupt -= handler;
+                anchor.Dispose();
             }
         }
 
@@ -514,6 +527,7 @@ namespace ApiSurface2Sample
             asm.Set(DestinationOperand.RegisterX, 5);
             asm.MarkLabel(countdown);
             asm.Jmp(PioCondition.XPostDec, countdown);
+            asm.Set(DestinationOperand.RegisterX, 0);
             asm.Jmp(PioCondition.XZero, emit);
             asm.MarkLabel(notZero);
             asm.Set(DestinationOperand.RegisterY, 0);
@@ -605,19 +619,26 @@ namespace ApiSurface2Sample
                 var producer = new Thread(() =>
                 {
                     Thread.Sleep(400);
+                    ProducerPutTicks = DateTime.UtcNow.Ticks;
                     sm.Put(0x0BADF00D);
                 });
 
-                long t0 = DateTime.UtcNow.Ticks;
+                ProducerPutTicks = 0;
                 producer.Start();
 
                 WokenValue = sm.Get();
 
-                long elapsedMs = (DateTime.UtcNow.Ticks - t0) / TimeSpan.TicksPerMillisecond;
+                long wakeTicks = DateTime.UtcNow.Ticks;
+                long elapsedMs = ProducerPutTicks == 0
+                    ? -1
+                    : (wakeTicks - ProducerPutTicks) / TimeSpan.TicksPerMillisecond;
                 producer.Join();
 
+                T25Elapsed = (int)elapsedMs;
+                T25Value = WokenValue;
+
                 bool ok = WokenValue == 0x0BADF00D;
-                ok = ok && elapsedMs >= 300 && elapsedMs < 2000;
+                ok = ok && elapsedMs >= 0 && elapsedMs < 500;
 
                 return ok;
             }
@@ -772,6 +793,143 @@ namespace ApiSurface2Sample
             }
         }
 
+        private static void BeaconT19Ev0()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT19Ev1()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT19EvMany()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT19FlagBit1()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT19FlagOther()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT25ValueOk()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT25ValueBad()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT25Fast()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT25Slow()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconT25Threw()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void FireDiagnostics()
+        {
+            if (_ran[8] && !_passed[8])
+            {
+                try
+                {
+                    if (T19EventsSeen == 0)
+                    {
+                        BeaconT19Ev0();
+                    }
+                    else if (T19EventsSeen == 1)
+                    {
+                        BeaconT19Ev1();
+                    }
+                    else
+                    {
+                        BeaconT19EvMany();
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                }
+
+                try
+                {
+                    if ((T19FlagsSeen & 0x2) != 0)
+                    {
+                        BeaconT19FlagBit1();
+                    }
+                    else
+                    {
+                        BeaconT19FlagOther();
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                }
+            }
+
+            if (_ran[14] && !_passed[14])
+            {
+                try
+                {
+                    if (T25Elapsed < 0)
+                    {
+                        BeaconT25Threw();
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                }
+
+                if (T25Elapsed >= 0)
+                {
+                    try
+                    {
+                        if (T25Value == 0x0BADF00D)
+                        {
+                            BeaconT25ValueOk();
+                        }
+                        else
+                        {
+                            BeaconT25ValueBad();
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
+
+                    try
+                    {
+                        if (T25Elapsed < 0)
+                        {
+                            BeaconT25Fast();
+                        }
+                        else
+                        {
+                            BeaconT25Slow();
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
+                }
+            }
+        }
+
         private static void BeaconGroupA()
         {
             throw new InvalidOperationException();
@@ -847,6 +1005,8 @@ namespace ApiSurface2Sample
                     FireNibble(failNibble, true);
                 }
             }
+
+            FireDiagnostics();
 
             try
             {
