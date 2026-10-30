@@ -131,7 +131,7 @@ namespace LogicCaptureSample
             asm.In(SourceOperand.Pins, pinCount);
             asm.Wrap();
 
-            asm.InShift(ShiftDirection.Right, autoPush: true, threshold: WordBits);
+            asm.SetInShift(ShiftDirection.Right, autoPush: true, threshold: WordBits);
 
             return asm.Build();
         }

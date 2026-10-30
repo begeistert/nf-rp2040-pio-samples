@@ -154,7 +154,7 @@ namespace SoftwareUartSample
             asm.Jmp(PioCondition.XPostDec, bitloop).Delay(6);
             asm.Wrap();
 
-            asm.OutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
 
             return asm.Build();
         }

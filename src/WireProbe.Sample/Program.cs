@@ -29,7 +29,7 @@ namespace WireProbeSample
         private static uint ReadPin(PioBlock pio, int pin)
         {
             var asm = new PioAssembler();
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
             PioLabel high = asm.DefineLabel();
             PioLabel done = asm.DefineLabel();
             asm.WrapTarget();

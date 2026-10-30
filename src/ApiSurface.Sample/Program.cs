@@ -74,8 +74,8 @@ namespace ApiSurfaceSample
         {
             var asm = new PioAssembler();
 
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
 
             asm.WrapTarget();
             asm.Out(DestinationOperand.RegisterX, 32);
@@ -164,8 +164,8 @@ namespace ApiSurfaceSample
             PioBlock pio = Pio.Get(Pio.MinIndex);
 
             var asm = new PioAssembler();
-            asm.OutShift(ShiftDirection.Left, autoPull: false, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: false, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
             asm.WrapTarget();
             asm.Pull();
             asm.Mov(DestinationOperand.RegisterX, SourceOperand.Status);
@@ -213,7 +213,7 @@ namespace ApiSurfaceSample
             PioProgram driverProgram = driverAsm.Build();
 
             var asm = new PioAssembler();
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
 
             PioLabel high = asm.DefineLabel();
             PioLabel done = asm.DefineLabel();

@@ -69,7 +69,7 @@ namespace BlinkSample
             asm.Irq(0);
             asm.Jmp(PioCondition.Always, loop);
 
-            asm.OutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
 
             return asm.Build();
         }

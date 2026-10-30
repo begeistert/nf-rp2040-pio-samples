@@ -18,8 +18,8 @@ namespace FloodSample
             PioBlock pio = Pio.Get(Pio.MinIndex);
 
             var asm = new PioAssembler();
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
             asm.WrapTarget();
             asm.Out(DestinationOperand.RegisterX, 32);
             asm.In(SourceOperand.RegisterX, 32);

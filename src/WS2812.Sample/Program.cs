@@ -83,7 +83,7 @@ namespace Ws2812Sample
             asm.Nop().Side(0).Delay(2);
             asm.Wrap();
 
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 24);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 24);
             return asm.Build();
         }
     }

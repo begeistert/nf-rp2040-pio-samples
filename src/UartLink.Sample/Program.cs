@@ -101,7 +101,7 @@ namespace UartLinkSample
                 SideSetOption = true,
             });
 
-            asm.OutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Right, autoPull: false, threshold: 32);
 
             PioLabel bitloop = asm.DefineLabel();
 
@@ -187,7 +187,7 @@ namespace UartLinkSample
         {
             var asm = new PioAssembler();
 
-            asm.InShift(ShiftDirection.Right, autoPush: false, threshold: 32);
+            asm.SetInShift(ShiftDirection.Right, autoPush: false, threshold: 32);
 
             PioLabel start = asm.DefineLabel();
             PioLabel bitloop = asm.DefineLabel();

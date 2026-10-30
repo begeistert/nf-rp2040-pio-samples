@@ -72,8 +72,8 @@ namespace ApiSurface2Sample
         {
             var asm = new PioAssembler();
 
-            asm.OutShift(dir, autoPull: true, threshold: threshold);
-            asm.InShift(dir, autoPush: true, threshold: threshold);
+            asm.SetOutShift(dir, autoPull: true, threshold: threshold);
+            asm.SetInShift(dir, autoPush: true, threshold: threshold);
 
             asm.WrapTarget();
             asm.Out(DestinationOperand.RegisterX, threshold);
@@ -387,7 +387,7 @@ namespace ApiSurface2Sample
             PioBlock pio = Pio.Get(Pio.MinIndex);
 
             var waiterAsm = new PioAssembler();
-            waiterAsm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            waiterAsm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
             waiterAsm.WrapTarget();
             waiterAsm.WaitIrq(true, 4);
             waiterAsm.In(SourceOperand.RegisterY, 32);
@@ -478,8 +478,8 @@ namespace ApiSurface2Sample
             PioBlock pio = Pio.Get(Pio.MinIndex);
 
             var asm = new PioAssembler();
-            asm.OutShift(ShiftDirection.Left, autoPull: false, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: false, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
             asm.WrapTarget();
             asm.Pull();
             asm.Mov(DestinationOperand.RegisterX, SourceOperand.OutputShiftRegister);
@@ -517,7 +517,7 @@ namespace ApiSurface2Sample
             PioBlock pio = Pio.Get(Pio.MinIndex);
 
             var asm = new PioAssembler();
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
 
             PioLabel countdown = asm.DefineLabel();
             PioLabel notZero = asm.DefineLabel();
@@ -565,8 +565,8 @@ namespace ApiSurface2Sample
 
             var asm = new PioAssembler();
             asm.SetOrigin(9);
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
             asm.WrapTarget();
             asm.Out(DestinationOperand.RegisterX, 32);
             asm.In(SourceOperand.RegisterX, 32);
@@ -660,8 +660,8 @@ namespace ApiSurface2Sample
                 SideSetPinDirs = true,
             });
 
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 32);
 
             asm.WrapTarget();
             asm.Out(DestinationOperand.RegisterX, 32).Side(1);

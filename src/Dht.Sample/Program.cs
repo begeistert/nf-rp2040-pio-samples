@@ -174,7 +174,7 @@ namespace DhtSample
             asm.In(SourceOperand.Pins, 1);
             asm.Wrap();
 
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 8);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 8);
 
             return asm.Build();
         }

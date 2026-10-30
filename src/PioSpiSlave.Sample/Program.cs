@@ -65,8 +65,8 @@ namespace PioSpiSlaveSample
         {
             var asm = new PioAssembler();
 
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 8);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 8);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 8);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 8);
 
             asm.WrapTarget();
             asm.WaitGpio(false, sckPin);

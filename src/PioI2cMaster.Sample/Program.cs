@@ -79,8 +79,8 @@ namespace PioI2cMasterSample
                 SideSetPinDirs = true,
             });
 
-            asm.OutShift(ShiftDirection.Left, autoPull: false, threshold: 32);
-            asm.InShift(ShiftDirection.Left, autoPush: false, threshold: 32);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: false, threshold: 32);
+            asm.SetInShift(ShiftDirection.Left, autoPush: false, threshold: 32);
 
             PioLabel bitloop = asm.DefineLabel();
 

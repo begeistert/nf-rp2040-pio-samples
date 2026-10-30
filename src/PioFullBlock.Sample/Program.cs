@@ -79,8 +79,8 @@ namespace PioFullBlockSample
                 SideSetCount = 1,
             });
 
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 8);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 8);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 8);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 8);
 
             asm.WrapTarget();
             asm.Out(DestinationOperand.Pins, 1).Side(0).Delay(1);
@@ -94,8 +94,8 @@ namespace PioFullBlockSample
         {
             var asm = new PioAssembler();
 
-            asm.OutShift(ShiftDirection.Left, autoPull: true, threshold: 8);
-            asm.InShift(ShiftDirection.Left, autoPush: true, threshold: 8);
+            asm.SetOutShift(ShiftDirection.Left, autoPull: true, threshold: 8);
+            asm.SetInShift(ShiftDirection.Left, autoPush: true, threshold: 8);
 
             asm.WrapTarget();
             asm.WaitPin(false, 1);
