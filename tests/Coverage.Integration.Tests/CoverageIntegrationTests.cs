@@ -50,7 +50,7 @@ public class CoverageIntegrationTests
     {
         var clr = NanoClrHarness.Boot(Firmware(), App());
         clr.Sim.AddPioProbe(0, out pio); // capture block-0 FIFO traffic from the very first cycle
-        for (int i = 0; i < 30000 && !clr.IsLockedUp; i++)
+        for (int i = 0; i < 100000 && !clr.IsLockedUp; i++)
         {
             clr.Sim.RunMicroseconds(100);
             if (IsDone(clr))

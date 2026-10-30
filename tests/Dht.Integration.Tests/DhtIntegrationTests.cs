@@ -85,8 +85,9 @@ public class DhtIntegrationTests
 
         uint[] words = { 0xA1A1A1A1u, 0xB2B2B2B2u, 0xC3C3C3C3u, 0xD4D4D4D4u, 0xE5E5E5E5u };
 
-        // Run until the app has muxed the data pin to PIO (it is then into its read loop, sm.Read armed).
-        for (int i = 0; i < 16000 && clr.Sim.Machine.IoBank0.GetFuncSel(DataPin) != 6; i++)
+        // Run until sm.Read has armed its DMA channel: the pin is muxed to PIO well before that, and each
+        // Read only stays armed for the sample's short timeout.
+        for (int i = 0; i < 200000 && !clr.Sim.Machine.Dma.AnyChannelBusy; i++)
         {
             clr.Sim.RunMicroseconds(50);
         }

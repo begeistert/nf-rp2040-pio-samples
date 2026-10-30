@@ -408,17 +408,17 @@ namespace CoverageSample
             SmIndexEnumOk = smByIndex.Index == freed ? 1 : 0;
 
             // --- Blocking Put/Get through the loopback ---
-            sm.ClearFifos();
-            sm.Enabled = true;
-            sm.Put(BlockingSentinel);
-            BlockingRoundTripOk = sm.Get() == BlockingSentinel ? 1 : 0;
+            sm1.ClearFifos();
+            sm1.Enabled = true;
+            sm1.Put(BlockingSentinel);
+            BlockingRoundTripOk = sm1.Get() == BlockingSentinel ? 1 : 0;
 
             // --- Blocking Put against a state machine that consumes nothing ---
             // The FIFO fills, the call parks on the TX interrupt and eventually gives up. A background
             // thread counts ticks throughout: if the native wait spun instead of parking, the CLR would
             // be frozen for the whole budget and this counter would barely move.
-            sm.Enabled = false;
-            sm.ClearFifos();
+            sm1.Enabled = false;
+            sm1.ClearFifos();
 
             int ticks = 0;
             bool ticking = true;
@@ -436,7 +436,7 @@ namespace CoverageSample
             {
                 for (int i = 0; i < 16; i++)
                 {
-                    sm.Put(0xF10F0000 + (uint)i);
+                    sm1.Put(0xF10F0000 + (uint)i);
                 }
             }
             catch
@@ -447,7 +447,7 @@ namespace CoverageSample
             ticking = false;
             TicksWhileParked = ticks;
 
-            sm.ClearFifos();
+            sm1.ClearFifos();
 
             Done = 1;
 

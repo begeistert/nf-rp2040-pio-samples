@@ -38,6 +38,7 @@ public class DmaProbeIntegrationTests(ITestOutputHelper output)
         // of emulated time, so give it a generous window and stop once its last measurement lands.
         var written = -1; var readBack = -1; var roundTrip = 0; var readStalled = -1; var writeStalled = -1;
         var done = false;
+        var initialized = false;
         for (var i = 0; i < 120_000 && !clr.IsLockedUp && !done; i++)
         {
             clr.Sim.RunMicroseconds(100);
@@ -45,7 +46,13 @@ public class DmaProbeIntegrationTests(ITestOutputHelper output)
             if (TryRead(clr, AppSymbols.Fields.ReadBack, out var r)) readBack = r;
             if (TryRead(clr, AppSymbols.Fields.RoundTripOk, out var rt)) roundTrip = rt;
             if (TryRead(clr, AppSymbols.Fields.WriteStalled, out var ws)) writeStalled = ws;
-            if (TryRead(clr, AppSymbols.Fields.ReadStalled, out var rs)) { readStalled = rs; done = rs != -1; }
+            if (TryRead(clr, AppSymbols.Fields.ReadStalled, out var rs))
+            {
+                // Static fields read 0 until the class constructor sets them to -1.
+                initialized |= rs == -1;
+                readStalled = rs;
+                done = initialized && rs != -1;
+            }
         }
 
         output.WriteLine($"Written={written} ReadBack={readBack} RoundTripOk={roundTrip} WriteStalled={writeStalled} ReadStalled={readStalled} done={done} locked={clr.IsLockedUp}");
