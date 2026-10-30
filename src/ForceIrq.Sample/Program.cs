@@ -8,6 +8,7 @@
 // raised in hardware but never reaches managed code.
 //
 
+using System;
 using System.Threading;
 using nanoFramework.Hardware.Pico.Pio;
 
@@ -17,9 +18,55 @@ namespace ForceIrqSample
     {
         private const int ForcedIrqFlag = 0;
         private const int PeriodMs = 500;
+        private const int Rounds = 10;
 
         public static int IrqCount;
         public static PioInterruptFlags LastFlags;
+
+        private static void BeaconForcedIrqDelivered()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconForcedIrqLost()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconForcedIrqFlagZero()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void BeaconAllRoundsDelivered()
+        {
+            throw new InvalidOperationException();
+        }
+
+        private static void Beacon(int which)
+        {
+            try
+            {
+                switch (which)
+                {
+                    case 0:
+                        BeaconForcedIrqDelivered();
+                        break;
+                    case 1:
+                        BeaconForcedIrqLost();
+                        break;
+                    case 2:
+                        BeaconForcedIrqFlagZero();
+                        break;
+                    default:
+                        BeaconAllRoundsDelivered();
+                        break;
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
 
         public static void Main()
         {
@@ -44,9 +91,38 @@ namespace ForceIrqSample
 
             sm.Enabled = true;
 
+            int delivered = 0;
+
+            for (int round = 0; round < Rounds; round++)
+            {
+                int before = IrqCount;
+
+                pio.ForceIrq(ForcedIrqFlag);
+                Thread.Sleep(PeriodMs);
+
+                if (IrqCount > before)
+                {
+                    delivered++;
+                    Beacon(0);
+
+                    if (((int)LastFlags & (1 << ForcedIrqFlag)) == 0)
+                    {
+                        Beacon(2);
+                    }
+                }
+                else
+                {
+                    Beacon(1);
+                }
+            }
+
+            if (delivered == Rounds)
+            {
+                Beacon(3);
+            }
+
             while (true)
             {
-                pio.ForceIrq(ForcedIrqFlag);
                 Thread.Sleep(PeriodMs);
             }
         }

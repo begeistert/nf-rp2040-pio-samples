@@ -269,7 +269,7 @@ namespace UartLinkSample
 
     public class Program
     {
-        private const int BaudRate = 57600;
+        private const int BaudRate = 115200;
         // NOT GP0/GP1: those are UART0, which is the Wire Protocol's transport on this target
         // (SERIAL_DRIVER SIOD0 in the target's serialcfg.h). Driving them from the PIO fights the
         // debugger for the same pads and neither side works.
