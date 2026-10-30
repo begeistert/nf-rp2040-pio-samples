@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
-using RP2040.TestKit.Probes;
+using RP2350Sharp.NanoFramework.TestKit;
+using RP2350.TestKit.Probes;
 using Xunit;
 
 namespace Fade.Integration.Tests;
@@ -26,22 +26,24 @@ public class FadeIntegrationTests
     public void Streams_the_duty_ramp_and_PWMs_the_pin()
     {
         using var clr = NanoClrHarness.Boot(Firmware(), App());
-        clr.Pico.AddPioProbe(0, out PioProbe pio);
+        clr.Sim.AddPioProbe(0, out PioProbe pio);
 
         int hi = 0, lo = 0;
-        clr.Pico.Rp2040.Pio0.WriteGpioPins = (value, mask) =>
+        var drivePads = clr.Sim.Machine.Pio0.WriteGpioPins;
+        clr.Sim.Machine.Pio0.WriteGpioPins = (value, mask) =>
         {
+            drivePads?.Invoke(value, mask);
             if ((mask & (1u << LedPin)) != 0) { if (((value >> LedPin) & 1) != 0) hi++; else lo++; }
         };
 
         for (int i = 0; i < 30000 && (pio.TxOf(0).Count < 5 || hi == 0 || lo == 0); i++)
-            clr.Pico.RunMicroseconds(100);
+            clr.Sim.RunMicroseconds(100);
 
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
 
         // The app ramps the duty 0,1,2,3,4… straight into the TX FIFO, and the SM PWMs the LED pin.
         Assert.Equal(new uint[] { 0, 1, 2, 3, 4 }, First(pio.TxOf(0), 5));
-        Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(LedPin));
+        Assert.Equal(6u, clr.Sim.Machine.IoBank0.GetFuncSel(LedPin));
         Assert.True(hi > 0 && lo > 0, "the SM never PWM'd the LED pin");
     }
 

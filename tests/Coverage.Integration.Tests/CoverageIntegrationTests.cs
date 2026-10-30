@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
-using RP2040.TestKit.Probes;
+using RP2350Sharp.NanoFramework.TestKit;
+using RP2350.TestKit.Probes;
 using Xunit;
 
 namespace Coverage.Integration.Tests;
@@ -49,10 +49,10 @@ public class CoverageIntegrationTests
     private static NanoClrHarness BootUntilDone(out PioProbe pio)
     {
         var clr = NanoClrHarness.Boot(Firmware(), App());
-        clr.Pico.AddPioProbe(0, out pio); // capture block-0 FIFO traffic from the very first cycle
+        clr.Sim.AddPioProbe(0, out pio); // capture block-0 FIFO traffic from the very first cycle
         for (int i = 0; i < 30000 && !clr.IsLockedUp; i++)
         {
-            clr.Pico.RunMicroseconds(100);
+            clr.Sim.RunMicroseconds(100);
             if (IsDone(clr))
             {
                 break;

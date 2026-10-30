@@ -16,7 +16,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
     <!-- RP2350 (Cortex-M33) emulator + nanoFramework test kit: boot the nanoCLR, walk managed state,
          check checksums. The RP2350 twin runs the M33 firmware the RP2040 (M0+) kit could not decode. -->
-    <PackageReference Include="SiliconTwin.RP2350.NanoFramework" Version="1.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <NanoFrameworkApp Include="..\..\src\Blink.Sample\Blink.Sample.nfproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,5 +37,12 @@
     </ItemGroup>
     <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />
   </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\RP2350Sharp\src\RP2350Sharp.NanoFramework.TestKit\RP2350Sharp.NanoFramework.TestKit.csproj" />
+    <ProjectReference Include="..\..\..\RP2040Sharp\src\RP2040Sharp.NanoFramework.TestKit.SourceGen\RP2040Sharp.NanoFramework.TestKit.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\RP2040Sharp\src\RP2040Sharp.NanoFramework.TestKit\build\RP2040Sharp.NanoFramework.TestKit.targets" />
 
 </Project>

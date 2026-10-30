@@ -13,9 +13,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
-    <!-- RP2040 emulator + nanoFramework test kit (boot the nanoCLR, walk managed state, check
-         checksums) + the NanoSymbols generator. BUSL-1.1 — the samples and the PIO library are MIT. -->
-    <PackageReference Include="RP2040Sharp.NanoFramework.TestKit" Version="1.0.1-beta.6" />
+    <!-- STEP 3 (TEMPORARY, UNCOMMITTED): use the LOCAL fixed RP2040Sharp emulator (OnRxPush fix active)
+         via ProjectReference instead of the NuGet, so the DMA RX-DREQ path closes in-harness. Revert to
+         the PackageReference once a fixed RP2040Sharp.NanoFramework.TestKit NuGet is released. -->
   </ItemGroup>
 
   <ItemGroup>
@@ -35,5 +35,15 @@
     </ItemGroup>
     <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />
   </Target>
+
+  <!-- STEP 3 (TEMPORARY, UNCOMMITTED): the NuGet's build/ targets aren't brought by a ProjectReference,
+       so import them explicitly to keep the nanoFramework app build wiring. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\RP2350Sharp\src\RP2350Sharp.NanoFramework.TestKit\RP2350Sharp.NanoFramework.TestKit.csproj" />
+    <ProjectReference Include="..\..\..\RP2040Sharp\src\RP2040Sharp.NanoFramework.TestKit.SourceGen\RP2040Sharp.NanoFramework.TestKit.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\RP2040Sharp\src\RP2040Sharp.NanoFramework.TestKit\build\RP2040Sharp.NanoFramework.TestKit.targets" />
 
 </Project>

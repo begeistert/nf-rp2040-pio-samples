@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
+using RP2350Sharp.NanoFramework.TestKit;
 using Xunit;
 
 namespace ForceIrq.Integration.Tests;

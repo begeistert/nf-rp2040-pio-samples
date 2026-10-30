@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
-using RP2040.TestKit.Boards;
-using RP2040.TestKit.Probes;
+using RP2350Sharp.NanoFramework.TestKit;
+using RP2350.TestKit.Boards;
+using RP2350.TestKit.Probes;
 using Xunit;
 
 namespace WS2812.Integration.Tests;
@@ -28,31 +28,35 @@ public class Ws2812IntegrationTests
     public void Serialises_two_WS2812_strips_onto_their_pins()
     {
         using var clr = NanoClrHarness.Boot(Firmware(), App());
-        clr.Pico.AddPioProbe(0, out PioProbe pio);
+        clr.Sim.AddPioProbe(0, out PioProbe pio);
 
         // Watch the PIO drive each data pin high and low as it clocks the bits out (side-set output).
         int hi0 = 0, lo0 = 0, hi1 = 0, lo1 = 0;
-        clr.Pico.Rp2040.Pio0.WriteGpioPins = (value, mask) =>
+        var drivePads = clr.Sim.Machine.Pio0.WriteGpioPins;
+        clr.Sim.Machine.Pio0.WriteGpioPins = (value, mask) =>
         {
+            drivePads?.Invoke(value, mask);
             if ((mask & (1u << Strip0Pin)) != 0) { if (((value >> Strip0Pin) & 1) != 0) hi0++; else lo0++; }
             if ((mask & (1u << Strip1Pin)) != 0) { if (((value >> Strip1Pin) & 1) != 0) hi1++; else lo1++; }
         };
 
-        for (int i = 0; i < 40000 &&
+        for (int i = 0; i < 80000 &&
              (pio.TxOf(0).Count < 3 || pio.TxOf(1).Count < 3 || hi0 == 0 || lo0 == 0 || hi1 == 0 || lo1 == 0); i++)
         {
-            clr.Pico.RunMicroseconds(20);
+            clr.Sim.RunMicroseconds(20);
         }
 
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
+        Assert.True(pio.TxOf(0).Count >= 3 && pio.TxOf(1).Count >= 3,
+            $"TX words: sm0={pio.TxOf(0).Count} sm1={pio.TxOf(1).Count}, toggles: {hi0}/{lo0} {hi1}/{lo1}");
 
         // The exact GRB words the app pushed crossed into each SM's TX FIFO, in order.
         Assert.Equal(new[] { Grb(64, 0, 0), Grb(0, 64, 0), Grb(0, 0, 64) }, First3(pio.TxOf(0)));
         Assert.Equal(new[] { Grb(0, 0, 64), Grb(64, 0, 0), Grb(0, 64, 0) }, First3(pio.TxOf(1)));
 
         // Each data pin is owned by the PIO (funcsel 6) and is driven both high and low — the SM serialises.
-        Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(Strip0Pin));
-        Assert.Equal(6u, clr.Pico.Rp2040.IoBank0.GetFuncSel(Strip1Pin));
+        Assert.Equal(6u, clr.Sim.Machine.IoBank0.GetFuncSel(Strip0Pin));
+        Assert.Equal(6u, clr.Sim.Machine.IoBank0.GetFuncSel(Strip1Pin));
         Assert.True(hi0 > 0 && lo0 > 0 && hi1 > 0 && lo1 > 0, "the PIO never toggled the data pins");
     }
 

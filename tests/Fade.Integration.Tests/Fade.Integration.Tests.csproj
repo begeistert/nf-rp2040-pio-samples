@@ -15,7 +15,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <!-- RP2040 emulator + nanoFramework test kit (boot the nanoCLR, walk managed state, check
          checksums) + the NanoSymbols generator. BUSL-1.1 — the samples and the PIO library are MIT. -->
-    <PackageReference Include="RP2040Sharp.NanoFramework.TestKit" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,5 +34,12 @@
     </ItemGroup>
     <Copy SourceFiles="@(_Pe)" DestinationFolder="$(OutDir)pe" SkipUnchangedFiles="true" />
   </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\RP2350Sharp\src\RP2350Sharp.NanoFramework.TestKit\RP2350Sharp.NanoFramework.TestKit.csproj" />
+    <ProjectReference Include="..\..\..\RP2040Sharp\src\RP2040Sharp.NanoFramework.TestKit.SourceGen\RP2040Sharp.NanoFramework.TestKit.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\RP2040Sharp\src\RP2040Sharp.NanoFramework.TestKit\build\RP2040Sharp.NanoFramework.TestKit.targets" />
 
 </Project>

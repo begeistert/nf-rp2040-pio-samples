@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
-using RP2040.TestKit.Probes;
+using RP2350Sharp.NanoFramework.TestKit;
+using RP2350.TestKit.Probes;
 using Xunit;
 
 namespace Echo.Integration.Tests;
@@ -24,10 +24,10 @@ public class EchoIntegrationTests
     public void Echoes_each_word_back_unchanged_through_both_FIFOs()
     {
         using var clr = NanoClrHarness.Boot(Firmware(), App());
-        clr.Pico.AddPioProbe(0, out PioProbe pio);
+        clr.Sim.AddPioProbe(0, out PioProbe pio);
 
         for (int i = 0; i < 8000 && pio.RxOf(0).Count < 3; i++)
-            clr.Pico.RunMicroseconds(100);
+            clr.Sim.RunMicroseconds(100);
 
         Assert.False(clr.IsLockedUp, "nanoCLR locked up");
         Assert.True(pio.RxOf(0).Count >= 3, "no words came back from the loopback");
@@ -41,10 +41,10 @@ public class EchoIntegrationTests
     public void Reads_back_FIFO_level_and_program_counter()
     {
         using var clr = NanoClrHarness.Boot(Firmware(), App());
-        clr.Pico.AddPioProbe(0, out PioProbe pio);
+        clr.Sim.AddPioProbe(0, out PioProbe pio);
 
         for (int i = 0; i < 8000 && pio.RxOf(0).Count < 2; i++)
-            clr.Pico.RunMicroseconds(100);
+            clr.Sim.RunMicroseconds(100);
 
         // The app records what the new native FLEVEL/PC accessors returned while looping.
         int pc = clr.ReadStaticInt32(AppSymbols.Assembly, AppSymbols.Fields.LastPc);

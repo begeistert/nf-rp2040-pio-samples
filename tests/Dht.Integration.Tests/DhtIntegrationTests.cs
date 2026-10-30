@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
-using RP2040.TestKit.Boards;
-using RP2040.TestKit.Probes;
+using RP2350Sharp.NanoFramework.TestKit;
+using RP2350.TestKit.Boards;
+using RP2350.TestKit.Probes;
 using Xunit;
 
 namespace Dht.Integration.Tests;
@@ -27,7 +27,7 @@ public class DhtIntegrationTests
     public void Decodes_a_DHT22_pulse_train_into_five_bytes()
     {
         using var clr = NanoClrHarness.Boot(Firmware(), App());
-        clr.Pico.AddPioProbe(0, out PioProbe pio);
+        clr.Sim.AddPioProbe(0, out PioProbe pio);
 
         // The reply to clock in, MSB-first: humidity 45.6 %RH (456 = 0x01C8), temperature 23.4 °C
         // (234 = 0x00EA), then the trailing checksum byte (sum of the four data bytes).
@@ -36,12 +36,12 @@ public class DhtIntegrationTests
 
         // Run until the app has muxed the data pin to PIO, then let the SM enable and finish its
         // ~1 ms start pulse — it then blocks waiting for the line to float up.
-        for (int i = 0; i < 16000 && clr.Pico.Rp2040.IoBank0.GetFuncSel(DataPin) != 6; i++)
+        for (int i = 0; i < 16000 && clr.Sim.Machine.IoBank0.GetFuncSel(DataPin) != 6; i++)
         {
-            clr.Pico.RunMicroseconds(50);
+            clr.Sim.RunMicroseconds(50);
         }
 
-        clr.Pico.RunMicroseconds(5000);
+        clr.Sim.RunMicroseconds(5000);
 
         // Pull-up floats the line high, then the sensor answers: 80 µs low, 80 µs high.
         Drive(clr, true, 60);
@@ -67,8 +67,53 @@ public class DhtIntegrationTests
         // probe value merely *changing* (vs the old TryGet path) confirms the DMA engaged. Full end-to-end
         // validation (decoded humidity/temperature) needs real Pico hardware, or a harness DREQ fix.
         _ = pio;
-        clr.Pico.RunMicroseconds(4000);
+        clr.Sim.RunMicroseconds(4000);
         Assert.False(clr.IsLockedUp, "the CLR locked up during the DMA read");
+    }
+
+    /// <summary>
+    /// End-to-end DMA validation against the LOCAL fixed emulator: feed a known word sequence straight
+    /// into the SM's RX FIFO (no sensor) and let the prototype's <c>sm.Read</c> drain it over a DREQ-paced
+    /// DMA channel. With the InjectRxData→OnRxPush fix the inject wakes the stalled channel; the probe
+    /// records every word the DMA pulls (OnRxPull), proving the RX-DREQ → DMA path closes in-harness.
+    /// </summary>
+    [Fact]
+    public void Read_drains_injected_rx_words_over_dma()
+    {
+        using var clr = NanoClrHarness.Boot(Firmware(), App());
+        clr.Sim.AddPioProbe(0, out PioProbe pio);
+
+        uint[] words = { 0xA1A1A1A1u, 0xB2B2B2B2u, 0xC3C3C3C3u, 0xD4D4D4D4u, 0xE5E5E5E5u };
+
+        // Run until the app has muxed the data pin to PIO (it is then into its read loop, sm.Read armed).
+        for (int i = 0; i < 16000 && clr.Sim.Machine.IoBank0.GetFuncSel(DataPin) != 6; i++)
+        {
+            clr.Sim.RunMicroseconds(50);
+        }
+
+        // Self-paced: inject the next word only when the FIFO is empty, so the DMA pulls each one before
+        // the next arrives. Reaching injected == words.Length means the DMA drained every word (the only
+        // consumer — the SM program is blocked waiting for the line).
+        int injected = 0;
+        for (int i = 0; i < 4000 && injected < words.Length; i++)
+        {
+            clr.Sim.RunMicroseconds(20);
+            if (clr.Sim.Machine.Pio0.RxFifoEmpty(0))
+            {
+                clr.Sim.Machine.Pio0.InjectRxData(0, words[injected]);
+                injected++;
+            }
+        }
+
+        clr.Sim.RunMicroseconds(3000);
+
+        Assert.False(clr.IsLockedUp, "the CLR locked up during the DMA read");
+        Assert.Equal(words.Length, injected);
+        IReadOnlyList<uint> rx = pio.RxOf(0);
+        foreach (uint w in words)
+        {
+            Assert.Contains(w, rx);
+        }
     }
 
     [Fact]
@@ -80,7 +125,7 @@ public class DhtIntegrationTests
     // Holds the data line at a level for the given microseconds while the emulator runs.
     private static void Drive(NanoClrHarness clr, bool high, int microseconds)
     {
-        clr.Pico.Rp2040.Sio.SetGpioExternalIn(DataPin, high);
-        clr.Pico.RunMicroseconds(microseconds);
+        clr.Sim.Machine.Sio.SetGpioExternalIn(DataPin, high);
+        clr.Sim.RunMicroseconds(microseconds);
     }
 }

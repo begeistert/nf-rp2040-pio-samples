@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using RP2040Sharp.NanoFramework.TestKit;
+using RP2350Sharp.NanoFramework.TestKit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -40,7 +40,7 @@ public class DmaProbeIntegrationTests(ITestOutputHelper output)
         var done = false;
         for (var i = 0; i < 120_000 && !clr.IsLockedUp && !done; i++)
         {
-            clr.Pico.RunMicroseconds(100);
+            clr.Sim.RunMicroseconds(100);
             if (TryRead(clr, AppSymbols.Fields.Written, out var w)) written = w;
             if (TryRead(clr, AppSymbols.Fields.ReadBack, out var r)) readBack = r;
             if (TryRead(clr, AppSymbols.Fields.RoundTripOk, out var rt)) roundTrip = rt;
