@@ -67,9 +67,9 @@ public class Ws2812IntegrationTests
 
         // The one host-side CLR hook worth keeping: drive the interpreter to the managed -> native PIO
         // boundary (pio.AddProgram's InternalCall), located by symbol.
-        Assert.True(clr.RunUntilNativeCall("PioBlock.NativeAddProgram"),
-            "the CLR never crossed into PioBlock.NativeAddProgram");
-        Assert.Equal("PioBlock.NativeAddProgram", clr.LastReachedSymbol);
+        Assert.True(clr.RunUntilNativeCall("PioBlock.AddProgram"),
+            "the CLR never crossed into PioBlock.AddProgram");
+        Assert.Equal("PioBlock.AddProgram", clr.LastReachedSymbol);
     }
 
     [Fact]
